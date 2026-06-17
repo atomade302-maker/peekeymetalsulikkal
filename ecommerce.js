@@ -90,12 +90,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showToast(msg, type='success') {
-        // Reuse toast from main.js or simple alert if missing
         const tc = document.querySelector('.toast-container');
         if(tc) {
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
-            toast.innerHTML = `<i class="fas fa-check-circle"></i> <span>${msg}</span>`;
+            let icon = '<i class="fas fa-check-circle"></i>';
+            if (type === 'wishlist') {
+                icon = '<i class="fas fa-heart"></i>';
+            } else if (type === 'info') {
+                icon = '<i class="fas fa-info-circle"></i>';
+            }
+            toast.innerHTML = `${icon} <span>${msg}</span>`;
             tc.appendChild(toast);
             toast.offsetHeight;
             toast.classList.add('active');
@@ -272,37 +277,175 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 4. Interactive Search Bar Functionality ---
     const searchInput = document.querySelector('input[placeholder*="Search"]');
     const searchBtn = document.querySelector('.search-wrapper-exact button, button[type="submit"]');
+    const selectedCategoryText = document.getElementById('selected-category-text');
+    const categoryDropdown = document.querySelector('.search-dropdown');
+    const categoryDropdownMenu = document.querySelector('.search-dropdown-menu');
 
-    if (searchInput) {
-        function performSearch() {
-            const query = searchInput.value.trim().toLowerCase();
-            const productCards = document.querySelectorAll('.product-card-exact');
-            let foundCount = 0;
+    // Category Selector Dropdown toggle
+    if (categoryDropdown && categoryDropdownMenu) {
+        categoryDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+            categoryDropdownMenu.classList.toggle('active');
+        });
 
-            productCards.forEach(card => {
-                const title = card.querySelector('.product-title-exact').innerText.toLowerCase();
-                if (title.includes(query)) {
-                    card.style.display = 'block';
-                    foundCount++;
-                } else {
-                    card.style.display = 'none';
+        document.addEventListener('click', () => {
+            categoryDropdownMenu.classList.remove('active');
+        });
+
+        categoryDropdownMenu.querySelectorAll('li').forEach(li => {
+            li.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const catVal = li.getAttribute('data-value');
+                selectedCategoryText.innerHTML = `${catVal} <i class="fas fa-chevron-down"></i>`;
+                categoryDropdownMenu.classList.remove('active');
+                if (searchInput) {
+                    searchInput.placeholder = catVal === 'All Categories' 
+                        ? 'Search for products, brands and more...' 
+                        : `Search in ${catVal}...`;
                 }
+                performSearch();
             });
+        });
+    }
 
-            // Smooth scroll to catalog section
-            const catalogSec = document.getElementById('best-sellers') || document.getElementById('catalog');
-            if (catalogSec) {
-                catalogSec.scrollIntoView({ behavior: 'smooth' });
+    // Levenshtein distance
+    function levenshtein(a, b) {
+        if (a.length === 0) return b.length;
+        if (b.length === 0) return a.length;
+        const matrix = [];
+        for (let i = 0; i <= b.length; i++) {
+            matrix[i] = [i];
+        }
+        for (let j = 0; j <= a.length; j++) {
+            matrix[0][j] = j;
+        }
+        for (let i = 1; i <= b.length; i++) {
+            for (let j = 1; j <= a.length; j++) {
+                if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                    matrix[i][j] = matrix[i - 1][j - 1];
+                } else {
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j - 1] + 1, // substitution
+                        matrix[i][j - 1] + 1,     // insertion
+                        matrix[i - 1][j] + 1      // deletion
+                    );
+                }
             }
+        }
+        return matrix[b.length][a.length];
+    }
 
-            // Show feedback
-            if (query !== '') {
-                showToast(`Found ${foundCount} items matching "${query}"`, 'success');
+    // Fuzzy matching
+    function fuzzyMatch(text, query) {
+        text = text.toLowerCase().trim();
+        query = query.toLowerCase().trim();
+        if (!query) return true;
+        if (text.includes(query)) return true;
+        
+        const textWords = text.split(/[\s,\-\/]+/);
+        const queryWords = query.split(/[\s,\-\/]+/);
+        
+        return queryWords.every(qWord => {
+            if (qWord.length <= 2) {
+                return textWords.some(tWord => tWord.includes(qWord));
+            }
+            return textWords.some(tWord => {
+                if (tWord.includes(qWord) || qWord.includes(tWord)) return true;
+                const dist = levenshtein(tWord, qWord);
+                const maxLen = Math.max(tWord.length, qWord.length);
+                const similarity = 1 - dist / maxLen;
+                const threshold = qWord.length <= 4 ? 0.5 : 0.6;
+                return similarity >= threshold || dist <= 2;
+            });
+        });
+    }
+
+    function performSearch() {
+        if (!searchInput) return;
+        const query = searchInput.value.trim().toLowerCase();
+        const selectedCat = selectedCategoryText ? selectedCategoryText.innerText.replace(/\s*<i.*$/i, '').trim() : 'All Categories';
+        
+        // 1. Search in Best Sellers
+        const productCards = document.querySelectorAll('.product-card-exact');
+        let bestSellerCount = 0;
+        productCards.forEach(card => {
+            const title = card.querySelector('.product-title-exact').innerText;
+            const cat = card.getAttribute('data-category');
+            
+            const matchesQuery = fuzzyMatch(title, query);
+            const matchesCat = (selectedCat === 'All Categories' || cat === selectedCat);
+            
+            if (matchesQuery && matchesCat) {
+                card.style.display = 'block';
+                bestSellerCount++;
             } else {
-                showToast('Showing all products', 'success');
+                card.style.display = 'none';
+            }
+        });
+
+        // 2. Search in Dynamic Shelf Products
+        const shelfItems = document.querySelectorAll('.shelf-item');
+        let shelfCount = 0;
+        shelfItems.forEach(item => {
+            const name = item.getAttribute('data-name') || (item.querySelector('.item-name') ? item.querySelector('.item-name').innerText : '');
+            const cat = item.getAttribute('data-category');
+            
+            const matchesQuery = fuzzyMatch(name, query);
+            const matchesCat = (selectedCat === 'All Categories' || cat === selectedCat);
+            
+            if (matchesQuery && matchesCat) {
+                item.style.display = 'block';
+                shelfCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        // Hide/Show dynamic sections depending on whether they contain visible products
+        const sections = document.querySelectorAll('.inventory-section');
+        sections.forEach(section => {
+            const visibleItems = section.querySelectorAll('.shelf-item:not([style*="display: none"])');
+            const divider = section.nextElementSibling;
+            
+            if (visibleItems.length === 0 && query !== '') {
+                section.style.display = 'none';
+                if (divider && divider.classList.contains('section-divider')) {
+                    divider.style.display = 'none';
+                }
+            } else {
+                section.style.display = 'block';
+                if (divider && divider.classList.contains('section-divider')) {
+                    divider.style.display = 'block';
+                }
+            }
+        });
+
+        // Hide/Show Best Sellers Section if empty
+        const bestSellersSec = document.getElementById('best-sellers');
+        if (bestSellersSec) {
+            const visibleCards = bestSellersSec.querySelectorAll('.product-card-exact:not([style*="display: none"])');
+            if (visibleCards.length === 0 && query !== '') {
+                bestSellersSec.style.display = 'none';
+            } else {
+                bestSellersSec.style.display = 'block';
             }
         }
 
+        // Scroll to Best Sellers or Catalog if a query was searched
+        if (query !== '') {
+            const targetSec = (bestSellerCount > 0) 
+                ? document.getElementById('best-sellers') 
+                : document.getElementById('catalog');
+            if (targetSec && targetSec.style.display !== 'none') {
+                targetSec.scrollIntoView({ behavior: 'smooth' });
+            }
+            showToast(`Found ${bestSellerCount + shelfCount} items matching "${query}"`, 'success');
+        } else {
+            showToast('Showing all products', 'success');
+        }
+    }
+
+    if (searchInput) {
         // Search trigger on button click
         if (searchBtn) {
             searchBtn.addEventListener('click', (e) => {
@@ -319,6 +462,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Social links click handler for "Will be soon!"
+    const socialSelectors = 'a[href*="facebook"], a[href*="twitter"], a[href*="youtube"], a[href*="instagram"], .social-icons a';
+    document.querySelectorAll(socialSelectors).forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.preventDefault();
+            showToast('Will be soon!', 'info');
+        });
+    });
 
     // --- 5. Newsletter Subscription Functionality ---
     const newsletterInput = document.querySelector('.nl-right input[type="email"]');

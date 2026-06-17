@@ -95,7 +95,26 @@
 </head>
 <body>
 
-    <!-- Right Sidebar Notch Trigger -->
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="preloader-logo-wrap">
+            <img src="banner-nobg.png?v=5" alt="Peekey Logo" class="preloader-logo">
+        </div>
+    </div>
+    <script>
+    window.addEventListener('load', function() {
+        const preloader = document.getElementById('preloader');
+        if (preloader) {
+            setTimeout(function() {
+                preloader.classList.add('fade-out');
+                setTimeout(function() {
+                    preloader.remove();
+                }, 600);
+            }, 2000);
+        }
+    });
+    </script>
+
     <div class="right-notch-btn" id="openSidebarBtn">
         <i class="fas fa-ellipsis-v"></i>
     </div>
@@ -119,12 +138,21 @@
     <div class="top-search-bar">
         <div class="container ts-inner">
             <a href="index.html" class="ts-logo">
-                <img src="logo.png" alt="Peekey Logo">
+                <img src="logo.png" alt="Peekey Logo" class="header-logo-icon">
+                <img src="banner-nobg.png?v=5" alt="Peekey Banner" class="header-logo-banner">
             </a>
             
             <div class="ts-search">
                 <div class="search-dropdown">
-                    <span>All Categories <i class="fas fa-chevron-down"></i></span>
+                    <span id="selected-category-text">All Categories <i class="fas fa-chevron-down"></i></span>
+                    <ul class="search-dropdown-menu">
+                        <li data-value="All Categories">All Categories</li>
+                        <li data-value="Home Appliances">Home Appliances</li>
+                        <li data-value="Kitchenware">Kitchenware</li>
+                        <li data-value="Crockery & Dining">Crockery & Dining</li>
+                        <li data-value="Pooja & Devotional">Pooja & Devotional</li>
+                        <li data-value="Home Essentials">Home Essentials</li>
+                    </ul>
                 </div>
                 <input type="text" placeholder="Search for products, brands and more...">
                 <button type="submit"><i class="fas fa-search"></i></button>
@@ -366,7 +394,7 @@
             
             <div class="product-grid-exact">
                 <!-- Product 1 -->
-                <div class="product-card-exact">
+                <div class="product-card-exact" data-category="Home Appliances">
                     <div class="product-img-box">
                         <img src="mixer grinder.png" alt="Product">
                     </div>
@@ -388,7 +416,7 @@
                 </div>
                 
                 <!-- Product 2 -->
-                <div class="product-card-exact">
+                <div class="product-card-exact" data-category="Kitchenware">
                     <div class="product-img-box">
                         <img src="Pressure Cooker.png" alt="Product">
                     </div>
@@ -410,7 +438,7 @@
                 </div>
 
                 <!-- Product 3 -->
-                <div class="product-card-exact">
+                <div class="product-card-exact" data-category="Kitchenware">
                     <div class="product-img-box">
                         <img src="Dosa Tawa.png" alt="Product">
                     </div>
@@ -432,7 +460,7 @@
                 </div>
 
                 <!-- Product 4 -->
-                <div class="product-card-exact">
+                <div class="product-card-exact" data-category="Home Appliances">
                     <div class="product-img-box">
                         <img src="Air Fryer.png" alt="Product">
                     </div>
@@ -832,6 +860,8 @@
           const el = document.createElement('div');
           el.className = 'shelf-item pk-cloud-item';
           el.dataset.pkid = p.id;
+          el.setAttribute('data-category', p.category);
+          el.setAttribute('data-name', p.name);
           
           // Click event: if Admin, open quick edit modal
           el.onclick = function(e) {

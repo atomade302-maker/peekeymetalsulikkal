@@ -156,11 +156,21 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
         <span id="cfgStatusBadge" style="color:var(--green);margin-left:6px"></span>
       </div>
       <div class="cfg-box" id="cfgBox">
-        <p style="color:var(--muted);font-size:.82rem;margin-bottom:12px">Configure your API key from <a href="https://api.imgbb.com" target="_blank" style="color:var(--red)">api.imgbb.com</a> below.</p>
-        <div class="cfg-row">
-          <div class="ufg" style="grid-column:1/-1"><label>imgbb API Key</label><input id="cfgKey" placeholder="Paste your imgbb API key here" type="password"></div>
+        <p style="color:var(--muted);font-size:.82rem;margin-bottom:12px">Choose your API key option for uploading images to <a href="https://api.imgbb.com" target="_blank" style="color:var(--red)">imgbb.com</a>.</p>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; cursor:pointer;">
+            <input type="radio" name="apiKeyOpt" id="optDefault" value="default" onchange="updateApiUi()" checked>
+            <span>Use Default Permanent API Key (built-in)</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; cursor:pointer;">
+            <input type="radio" name="apiKeyOpt" id="optCustom" value="custom" onchange="updateApiUi()">
+            <span>Paste Custom API Key</span>
+          </label>
         </div>
-        <button class="ubtn" onclick="saveCfg()" style="margin-top:10px"><i class="fas fa-save"></i> Save API Key</button>
+        <div class="cfg-row" id="customKeyRow" style="display:none;">
+          <div class="ufg" style="grid-column:1/-1"><label>imgbb API Key</label><input id="cfgKey" placeholder="Paste your custom imgbb API key here" type="password"></div>
+        </div>
+        <button class="ubtn" onclick="saveCfg()" style="margin-top:10px"><i class="fas fa-save"></i> Save Configuration</button>
         <div class="cfg-status" id="cfgStatus"></div>
       </div>
 
@@ -261,17 +271,27 @@ if (sessionStorage.getItem('pk_admin')) {
 }
 
 // ── INIT ───────────────────────────────────────────────────────────
+function updateApiUi() {
+  const isCustom = document.getElementById('optCustom').checked;
+  document.getElementById('customKeyRow').style.display = isCustom ? 'grid' : 'none';
+}
+
 function initDash() {
+  const useDefault = localStorage.getItem('pk_use_default_key') !== 'false';
   const key = localStorage.getItem(CK.key) || '';
   document.getElementById('cfgKey').value = key;
-  if (key) {
-    document.getElementById('cfgStatusBadge').textContent = '✓ Connected';
-    document.getElementById('cfgStatus').textContent = '✓ imgbb API key saved';
-    document.getElementById('sCloud').textContent = '✓';
+  
+  if (useDefault) {
+    document.getElementById('optDefault').checked = true;
   } else {
-    // Auto-open config if not set
-    document.getElementById('cfgBox').classList.add('open');
+    document.getElementById('optCustom').checked = true;
   }
+  updateApiUi();
+
+  document.getElementById('cfgStatusBadge').textContent = '✓ Connected';
+  document.getElementById('cfgStatus').textContent = useDefault ? '✓ Using Default Permanent API Key' : '✓ Custom API key saved';
+  document.getElementById('sCloud').textContent = '✓';
+
   renderGrid('All');
   updateStats();
 }
@@ -283,14 +303,25 @@ function toggleCfg() {
   document.getElementById('cfgIcon').style.transform = box.classList.contains('open') ? 'rotate(90deg)' : '';
 }
 function saveCfg() {
-  const key = document.getElementById('cfgKey').value.trim();
-  if (!key) { showToast('Paste your imgbb API key!', 'err'); return; }
-  localStorage.setItem(CK.key, key);
-  document.getElementById('cfgStatusBadge').textContent = '✓ Connected';
-  document.getElementById('cfgStatus').textContent = '✓ API key saved!';
-  document.getElementById('sCloud').textContent = '✓';
-  document.getElementById('cfgBox').classList.remove('open');
-  showToast('API key saved! You can now upload images.', 'ok');
+  const isDefault = document.getElementById('optDefault').checked;
+  if (isDefault) {
+    localStorage.setItem('pk_use_default_key', 'true');
+    document.getElementById('cfgStatusBadge').textContent = '✓ Connected';
+    document.getElementById('cfgStatus').textContent = '✓ Using Default Permanent API Key';
+    document.getElementById('sCloud').textContent = '✓';
+    document.getElementById('cfgBox').classList.remove('open');
+    showToast('Using default permanent API key.', 'ok');
+  } else {
+    const key = document.getElementById('cfgKey').value.trim();
+    if (!key) { showToast('Paste your custom imgbb API key!', 'err'); return; }
+    localStorage.setItem('pk_use_default_key', 'false');
+    localStorage.setItem(CK.key, key);
+    document.getElementById('cfgStatusBadge').textContent = '✓ Connected';
+    document.getElementById('cfgStatus').textContent = '✓ Custom API key saved';
+    document.getElementById('sCloud').textContent = '✓';
+    document.getElementById('cfgBox').classList.remove('open');
+    showToast('Custom API key saved successfully.', 'ok');
+  }
 }
 
 // ── AUTO DETECT ────────────────────────────────────────────────────
@@ -341,11 +372,12 @@ function clearFiles() { selFiles = []; renderPreviews(); document.getElementById
 async function doUpload() {
   const name = document.getElementById('uName').value.trim();
   const cat = document.getElementById('uCat').value;
-  const apiKey = localStorage.getItem(CK.key) || '';
+  const useDefault = localStorage.getItem('pk_use_default_key') !== 'false';
+  const apiKey = useDefault ? 'f8c12c3f56c637bbf020ca4ddaedc221' : (localStorage.getItem(CK.key) || '');
   if (!name) { showToast('Enter a product name!', 'err'); return; }
   if (!apiKey) {
     document.getElementById('cfgBox').classList.add('open');
-    showToast('⚙️ Paste your imgbb API key first!', 'err');
+    showToast('⚙️ Configure your imgbb API key first!', 'err');
     return;
   }
   if (!selFiles.length) { showToast('Select images to upload!', 'err'); return; }
