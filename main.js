@@ -320,6 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         waModal.classList.add('active');
     }
+    window.openWaModal = openWaModal;
 
     function closeWaModal() {
         waModal.classList.remove('active');

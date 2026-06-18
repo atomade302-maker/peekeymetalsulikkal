@@ -103,6 +103,42 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 #toast.ok i{color:var(--green)}
 #toast.err i{color:#ef4444}
 
+/* Style for new Dual Dropzone in Admin Overlay */
+.ap-dual-dz {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.ap-dz-wrap {
+  display: flex;
+  flex-direction: column;
+}
+.ap-dz-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  width: fit-content;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.ap-dz-badge.required {
+  background: rgba(192, 57, 43, 0.15);
+  color: var(--red);
+}
+.ap-dz-badge.optional {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--orange);
+}
+@media (max-width: 600px) {
+  .ap-dual-dz {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}.urow{grid-template-columns:1fr}.cfg-row{grid-template-columns:1fr}}
 </style>
 </head>
@@ -196,14 +232,29 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
         </div>
       </div>
 
-      <div class="dropzone" id="dz" onclick="document.getElementById('fInput').click()">
-        <i class="fas fa-images"></i>
-        <p><span>Click to browse</span> or drag &amp; drop images here</p>
-        <p style="font-size:.75rem;margin-top:6px;color:#3a4060">PNG · JPG · WEBP · Multiple files supported</p>
-      </div>
-      <input type="file" id="fInput" accept="image/*" multiple>
+      <div class="ap-dual-dz">
+        <!-- Product Image Dropzone -->
+        <div class="ap-dz-wrap">
+          <span class="ap-dz-badge required">★ Product Image (Required)</span>
+          <div class="dropzone" id="dz" onclick="document.getElementById('fInput').click()" style="padding: 24px;">
+            <i class="fas fa-image" style="font-size: 2rem; margin-bottom: 8px;"></i>
+            <p style="font-size: 0.82rem;"><span>Click to browse</span> or drag &amp; drop</p>
+          </div>
+          <input type="file" id="fInput" accept="image/*">
+          <div class="previews" id="previews" style="margin-top: 8px;"></div>
+        </div>
 
-      <div class="previews" id="previews"></div>
+        <!-- Description Image Dropzone -->
+        <div class="ap-dz-wrap">
+          <span class="ap-dz-badge optional">✦ Description / Spec (Optional)</span>
+          <div class="dropzone" id="descDz" onclick="document.getElementById('descFInput').click()" style="padding: 24px;">
+            <i class="fas fa-file-invoice" style="font-size: 2rem; color: var(--orange); margin-bottom: 8px;"></i>
+            <p style="font-size: 0.82rem;"><span style="color: var(--orange);">Click to browse</span> or drag &amp; drop</p>
+          </div>
+          <input type="file" id="descFInput" accept="image/*">
+          <div class="previews" id="descPreviews" style="margin-top: 8px;"></div>
+        </div>
+      </div>
       <div class="pbwrap" id="pbwrap"><div class="pbfill" id="pbfill"></div></div>
 
       <div class="uactions">
@@ -340,16 +391,23 @@ function autoDetectCat(val) {
 
 // ── FILE HANDLING ──────────────────────────────────────────────────
 let selFiles = [];
+let selDescFile = null;
 
+// Product Image dropzone handlers
 document.getElementById('dz').addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add('over'); });
 document.getElementById('dz').addEventListener('dragleave', e => e.currentTarget.classList.remove('over'));
 document.getElementById('dz').addEventListener('drop', e => { e.preventDefault(); e.currentTarget.classList.remove('over'); addFiles([...e.dataTransfer.files]); });
 document.getElementById('fInput').addEventListener('change', e => { addFiles([...e.target.files]); e.target.value = ''; });
 
+// Description / Spec dropzone handlers
+document.getElementById('descDz').addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add('over'); });
+document.getElementById('descDz').addEventListener('dragleave', e => e.currentTarget.classList.remove('over'));
+document.getElementById('descDz').addEventListener('drop', e => { e.preventDefault(); e.currentTarget.classList.remove('over'); addDescFile(e.dataTransfer.files[0]); });
+document.getElementById('descFInput').addEventListener('change', e => { if (e.target.files[0]) addDescFile(e.target.files[0]); e.target.value = ''; });
+
 function addFiles(files) {
   files = files.filter(f => f.type.startsWith('image/'));
   selFiles = [...selFiles, ...files];
-  // Auto-detect from first file name if product name is empty
   if (!document.getElementById('uName').value && files[0]) {
     const guess = files[0].name.replace(/\.(png|jpg|jpeg|webp)$/i, '').replace(/[-_]/g, ' ');
     document.getElementById('uName').value = guess;
@@ -366,7 +424,33 @@ function renderPreviews() {
 }
 
 function rmFile(i) { selFiles.splice(i, 1); renderPreviews(); document.getElementById('uploadBtn').disabled = !selFiles.length; }
-function clearFiles() { selFiles = []; renderPreviews(); document.getElementById('uploadBtn').disabled = true; document.getElementById('uName').value = ''; document.getElementById('autoDetect').style.display = 'none'; }
+
+function addDescFile(f) {
+  if (!f || !f.type.startsWith('image/')) return;
+  selDescFile = f;
+  renderDescPreview();
+}
+
+function renderDescPreview() {
+  const container = document.getElementById('descPreviews');
+  if (!selDescFile) { container.innerHTML = ''; return; }
+  container.innerHTML = `<div class="pitem"><img src="${URL.createObjectURL(selDescFile)}"><button class="px" onclick="rmDescFile()"><i class="fas fa-xmark"></i></button></div>`;
+}
+
+function rmDescFile() {
+  selDescFile = null;
+  renderDescPreview();
+}
+
+function clearFiles() {
+  selFiles = [];
+  selDescFile = null;
+  renderPreviews();
+  renderDescPreview();
+  document.getElementById('uploadBtn').disabled = true;
+  document.getElementById('uName').value = '';
+  document.getElementById('autoDetect').style.display = 'none';
+}
 
 // ── UPLOAD via imgbb ───────────────────────────────────────────────
 async function doUpload() {
@@ -391,19 +475,44 @@ async function doUpload() {
 
   const products = getProducts();
   let done = 0;
+
+  // Upload description image if selected
+  let descUrl = '';
+  if (selDescFile) {
+    try {
+      const db64 = await toBase64(selDescFile);
+      const dfd = new FormData();
+      dfd.append('key', apiKey);
+      dfd.append('image', db64.split(',')[1]);
+      dfd.append('name', 'desc-' + name.replace(/\s+/g,'-'));
+      const dres = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: dfd });
+      const ddata = await dres.json();
+      if (ddata.success && ddata.data?.url) {
+        descUrl = ddata.data.display_url || ddata.data.url;
+      }
+    } catch(e) { console.error('Error uploading description image:', e); }
+  }
+
   for (const file of selFiles) {
     try {
-      // Convert to base64
       const b64 = await toBase64(file);
       const fd = new FormData();
       fd.append('key', apiKey);
-      fd.append('image', b64.split(',')[1]); // strip data:...;base64,
+      fd.append('image', b64.split(',')[1]);
       fd.append('name', name.replace(/\s+/g,'-'));
       const r = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: fd });
       const d = await r.json();
       if (d.success && d.data?.url) {
         const price = document.getElementById('uPrice').value.trim();
-        products.push({ id: d.data.id, name, price, category: cat, url: d.data.display_url || d.data.url, at: Date.now() });
+        products.push({
+          id: d.data.id,
+          name,
+          price,
+          category: cat,
+          url: d.data.display_url || d.data.url,
+          descUrl: descUrl || undefined,
+          at: Date.now()
+        });
       } else {
         showToast('Upload error: ' + (d.error?.message || 'Check API key'), 'err');
       }
@@ -457,7 +566,10 @@ function renderGrid(filter) {
       <img src="${p.url}" alt="${p.name}" style="width:100%;height:100px;object-fit:contain;border-radius:8px;">
       <div class="pcard-body" style="padding:0;display:flex;flex-direction:column;gap:6px;">
         <div>
-          <label style="font-size:0.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:2px;text-transform:uppercase;">Product Name</label>
+          <div style="display:flex;justify-content:between;align-items:center;margin-bottom:2px;width:100%;">
+            <label style="font-size:0.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;flex:1;">Product Name</label>
+            ${p.descUrl ? `<span style="font-size:0.6rem;color:var(--orange);font-weight:800;background:rgba(245,158,11,0.12);padding:1px 5px;border-radius:4px;display:inline-flex;align-items:center;gap:3px;"><i class="fas fa-file-invoice"></i> SPEC</span>` : ''}
+          </div>
           <input type="text" value="${p.name}" onchange="updateProduct(${ri}, 'name', this.value)" style="width:100%;padding:4px 8px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:0.8rem;outline:none;">
         </div>
         <div>
@@ -582,8 +694,12 @@ if (!localStorage.getItem('pk_initialized')) {
       let parsed = JSON.parse(stored);
       let updated = false;
       parsed.forEach(p => {
-        if (p.url && p.url.includes('/')) {
+        if (p.url && p.url.includes('/') && !p.url.startsWith('http') && !p.url.startsWith('data:')) {
           p.url = p.url.split('/').pop();
+          updated = true;
+        }
+        if (p.descUrl && p.descUrl.includes('/') && !p.descUrl.startsWith('http') && !p.descUrl.startsWith('data:')) {
+          p.descUrl = p.descUrl.split('/').pop();
           updated = true;
         }
       });

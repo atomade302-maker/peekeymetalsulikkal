@@ -51,7 +51,7 @@
       background: #fff;
       border-radius: 16px;
       width: 100%;
-      max-width: 380px;
+      max-width: 440px;
       padding: 24px;
       font-family: 'Outfit', sans-serif;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -64,8 +64,12 @@
     }
     @media (max-width: 480px) {
       .qe-card {
-        padding: 18px;
+        padding: 16px;
         border-radius: 12px;
+        max-width: 95%;
+      }
+      .qe-img-box img {
+        height: 70px;
       }
     }
     /* Admin Mode Highlight on shelves */
@@ -90,6 +94,128 @@
     }
     .admin-mode-active .shelf-item:hover::after {
       opacity: 1;
+    }
+
+    /* Style for new Dual Dropzone in Admin Overlay */
+    .ap-dual-dz {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .ap-dz-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+    .ap-dz-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      width: fit-content;
+    }
+    .ap-dz-badge.required {
+      background: rgba(173, 31, 53, 0.15);
+      color: #ad1f35;
+    }
+    .ap-dz-badge.optional {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+    }
+    @media (max-width: 600px) {
+      .ap-dual-dz {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Style for image slots in Quick Edit Modal */
+    .qe-imgs-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .qe-img-box {
+      background: #f8f9fa;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 8px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      transition: border-color 0.2s ease;
+    }
+    .qe-img-box:hover {
+      border-color: #ad1f35;
+    }
+    .qe-img-box img {
+      width: 100%;
+      height: 90px;
+      object-fit: contain;
+      border-radius: 6px;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .qe-img-label {
+      font-size: 0.68rem;
+      color: #666;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .qe-img-badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      font-size: 0.6rem;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .qe-img-badge.set {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+    }
+    .qe-img-badge.missing {
+      background: rgba(107, 116, 148, 0.15);
+      color: #6b7494;
+    }
+    .qe-uploading {
+      font-size: 0.8rem;
+      color: #f59e0b;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    /* Inline description upload button for admin */
+    .ap-inline-desc-btn {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      background: rgba(245, 158, 11, 0.95);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 6px;
+      cursor: pointer;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      transition: all 0.2s ease;
+      font-family: 'Outfit', sans-serif;
+    }
+    .ap-inline-desc-btn:hover {
+      background: #d97706;
+      transform: scale(1.05);
     }
     </style>
 </head>
@@ -306,7 +432,7 @@
     </section>
 
     <!-- Shop By Category -->
-    <section class="section-padding bg-white" id="best-sellers">
+    <section class="section-padding bg-white" id="shop-by-category">
         <div class="container">
             <div class="section-header-flex">
                 <h2 class="section-title-left">Shop By Category</h2>
@@ -733,6 +859,7 @@
     <script src="main.js"></script>
     <script src="ecommerce.js"></script>
     <script src="cloud-images.js"></script>
+    <script src="desc-popup.js"></script>
     <script>CloudImages.applyToPage();</script>
     <script>
     // Load admin-uploaded cloud products into the correct shelf sections
@@ -824,8 +951,12 @@
             let parsed = JSON.parse(stored);
             let updated = false;
             parsed.forEach(p => {
-              if (p.url && p.url.includes('/')) {
+              if (p.url && p.url.includes('/') && !p.url.startsWith('http') && !p.url.startsWith('data:')) {
                 p.url = p.url.split('/').pop();
+                updated = true;
+              }
+              if (p.descUrl && p.descUrl.includes('/') && !p.descUrl.startsWith('http') && !p.descUrl.startsWith('data:')) {
+                p.descUrl = p.descUrl.split('/').pop();
                 updated = true;
               }
             });
@@ -834,6 +965,255 @@
             }
           }
         } catch(e) {}
+      }
+
+      function attachInlineDescUploadButtons() {
+        document.querySelectorAll('.ap-inline-desc-btn').forEach(btn => btn.remove());
+        const isAdmin = sessionStorage.getItem('pk_user_email') === ADMIN_EMAIL;
+        if (!isAdmin) return;
+
+        // 1. Product cards & shelf items
+        const containers = document.querySelectorAll('.item-image-placeholder, .product-img-box');
+        containers.forEach(container => {
+          container.style.position = 'relative';
+          const card = container.closest('.shelf-item, .product-card-exact');
+          if (!card) return;
+
+          const productName = card.querySelector('.item-name, .product-title-exact')?.innerText.trim();
+          const imgEl = container.querySelector('img');
+          const productImgUrl = imgEl ? imgEl.getAttribute('src') : '';
+
+          const btn = document.createElement('button');
+          btn.className = 'ap-inline-desc-btn';
+          btn.innerHTML = '<i class="fas fa-file-invoice"></i> + Spec';
+          btn.title = 'Upload Description / Spec Image';
+
+          btn.onclick = function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+
+            const key = localStorage.getItem('pk_imgbb_key') || '';
+            if (!key) {
+              apToast('⚠ Paste your imgbb API key in the Admin Panel (Ctrl+Shift+A) first!', 'err');
+              return;
+            }
+
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.style.display = 'none';
+
+            fileInput.onchange = async () => {
+              const file = fileInput.files[0];
+              if (!file) return;
+
+              btn.disabled = true;
+              btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>...';
+
+              try {
+                const b64 = await new Promise((r, j) => {
+                  const fr = new FileReader();
+                  fr.onload = () => r(fr.result);
+                  fr.onerror = j;
+                  fr.readAsDataURL(file);
+                });
+
+                const fd = new FormData();
+                fd.append('key', key);
+                fd.append('image', b64.split(',')[1]);
+                fd.append('name', 'desc-' + productName.replace(/\s+/g, '-'));
+
+                const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: fd });
+                const data = await res.json();
+
+                if (data.success && data.data?.url) {
+                  const uploadedUrl = data.data.display_url || data.data.url;
+                  let products = JSON.parse(localStorage.getItem(SK) || '[]');
+                  
+                  let p = null;
+                  const pkid = card.dataset.pkid;
+                  if (pkid) {
+                    p = products.find(prod => prod.id === pkid);
+                  }
+                  if (!p && productName) {
+                    p = products.find(prod => prod.name && prod.name.toLowerCase().trim() === productName.toLowerCase().trim());
+                  }
+
+                  if (!p) {
+                    p = {
+                      id: 'static-' + Date.now(),
+                      name: productName,
+                      category: card.getAttribute('data-category') || 'Home Appliances',
+                      url: productImgUrl,
+                      at: Date.now()
+                    };
+                    products.push(p);
+                  }
+
+                  p.descUrl = uploadedUrl;
+                  localStorage.setItem(SK, JSON.stringify(products));
+                  apToast('Description image uploaded successfully!', 'ok');
+                  
+                  window.dispatchEvent(new CustomEvent('pk_products_updated'));
+                  window.dispatchEvent(new StorageEvent('storage', { key: SK }));
+                } else {
+                  apToast('Upload failed: ' + (data.error?.message || 'Unknown error'), 'err');
+                }
+              } catch(err) {
+                console.error(err);
+                apToast('Upload error: ' + err.message, 'err');
+              } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-file-invoice"></i> + Spec';
+              }
+            };
+
+            fileInput.click();
+          };
+
+          container.appendChild(btn);
+        });
+
+        // 2. Best Sellers card click — image clicks handled by desc-popup.js capture listener
+        document.querySelectorAll('.product-card-exact').forEach(card => {
+          card.onclick = null;
+          card.addEventListener('click', function(e) {
+            if (e.target.closest('.wishlist-btn-exact, .cart-btn-exact')) return;
+
+            const titleEl = card.querySelector('.product-title-exact');
+            if (!titleEl) return;
+            const productName  = titleEl.innerText.trim();
+            const imgEl        = card.querySelector('.product-img-box img');
+            const productImgUrl = imgEl ? imgEl.getAttribute('src') : '';
+
+            const _isAdmin = sessionStorage.getItem('pk_user_email') === ADMIN_EMAIL;
+            if (_isAdmin) {
+              let products = JSON.parse(localStorage.getItem(SK) || '[]');
+              let idx = products.findIndex(p => p.name &&
+                p.name.toLowerCase().trim() === productName.toLowerCase().trim());
+              if (idx === -1) {
+                products.push({ id:'static-'+Date.now(), name:productName,
+                  category: card.getAttribute('data-category')||'Home Appliances',
+                  url: productImgUrl,
+                  price: card.querySelector('.current')?.innerText.replace('₹','').replace(/,/g,'').trim()||'',
+                  at: Date.now() });
+                localStorage.setItem(SK, JSON.stringify(products));
+                idx = products.length - 1;
+                window.dispatchEvent(new CustomEvent('pk_products_updated'));
+              }
+              openQuickEdit(idx);
+            } else {
+              if (window.openWaModal) window.openWaModal(productName, productImgUrl);
+            }
+          });
+        });
+
+        // 3. Category cards inline edit/replace buttons (.cat-card-exact)
+        document.querySelectorAll('.cat-card-exact').forEach(card => {
+          card.style.position = 'relative';
+          const titleEl = card.querySelector('h3');
+          if (!titleEl) return;
+          const origName = card.dataset.origName || titleEl.innerHTML.replace(/<br>/g, ' ').replace(/\s+/g, ' ').trim();
+
+          const btn = document.createElement('button');
+          btn.className = 'ap-inline-desc-btn';
+          btn.style.background = '#ad1f35';
+          btn.style.bottom = '10px';
+          btn.style.right = '10px';
+          btn.innerHTML = '<i class="fas fa-edit"></i> Edit';
+          btn.title = 'Edit Category Title & Image';
+
+          btn.onclick = function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+
+            let currentName = origName;
+            let customCats = {};
+            try { customCats = JSON.parse(localStorage.getItem('peekey_custom_categories') || '{}'); } catch(e) {}
+            if (customCats[origName] && customCats[origName].name) {
+              currentName = customCats[origName].name;
+            }
+
+            const newName = prompt('Enter new Category Name:', currentName);
+            if (newName === null) return;
+
+            if (confirm('Do you want to change the image for this Category?')) {
+              const key = localStorage.getItem('pk_imgbb_key') || '';
+              if (!key) {
+                apToast('⚠ Paste your imgbb API key in the Admin Panel (Ctrl+Shift+A) first!', 'err');
+                return;
+              }
+
+              const fileInput = document.createElement('input');
+              fileInput.type = 'file';
+              fileInput.accept = 'image/*';
+              fileInput.style.display = 'none';
+
+              fileInput.onchange = async () => {
+                const file = fileInput.files[0];
+                if (!file) return;
+
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>...';
+
+                try {
+                  const b64 = await new Promise((r, j) => {
+                    const fr = new FileReader();
+                    fr.onload = () => r(fr.result);
+                    fr.onerror = j;
+                    fr.readAsDataURL(file);
+                  });
+
+                  const fd = new FormData();
+                  fd.append('key', key);
+                  fd.append('image', b64.split(',')[1]);
+                  fd.append('name', 'cat-' + newName.replace(/\s+/g, '-'));
+
+                  const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: fd });
+                  const data = await res.json();
+
+                  if (data.success && data.data?.url) {
+                    const uploadedUrl = data.data.display_url || data.data.url;
+                    
+                    let customCats = {};
+                    try { customCats = JSON.parse(localStorage.getItem('peekey_custom_categories') || '{}'); } catch(e) {}
+                    customCats[origName] = {
+                      name: newName,
+                      url: uploadedUrl
+                    };
+                    localStorage.setItem('peekey_custom_categories', JSON.stringify(customCats));
+                    apToast('Category updated successfully!', 'ok');
+                    
+                    syncStaticSections();
+                  } else {
+                    apToast('Upload failed: ' + (data.error?.message || 'Unknown error'), 'err');
+                  }
+                } catch(err) {
+                  console.error(err);
+                  apToast('Upload error: ' + err.message, 'err');
+                } finally {
+                  btn.disabled = false;
+                  btn.innerHTML = '<i class="fas fa-edit"></i> Edit';
+                }
+              };
+
+              fileInput.click();
+            } else {
+              let customCats = {};
+              try { customCats = JSON.parse(localStorage.getItem('peekey_custom_categories') || '{}'); } catch(e) {}
+              const existingUrl = customCats[origName] ? customCats[origName].url : '';
+              customCats[origName] = {
+                name: newName,
+                url: existingUrl
+              };
+              localStorage.setItem('peekey_custom_categories', JSON.stringify(customCats));
+              apToast('Category name updated!', 'ok');
+              syncStaticSections();
+            }
+          };
+
+          card.appendChild(btn);
+        });
       }
 
       function load(){
@@ -863,11 +1243,19 @@
           el.setAttribute('data-category', p.category);
           el.setAttribute('data-name', p.name);
           
-          // Click event: if Admin, open quick edit modal
+          // Click on card (not image) → admin Quick Edit or user WA modal
+          // Image clicks are intercepted by desc-popup.js before reaching here
           el.onclick = function(e) {
             if(sessionStorage.getItem('pk_user_email') === ADMIN_EMAIL) {
               e.preventDefault();
               openQuickEdit(idx);
+            } else {
+              if (window.openWaModal) {
+                e.preventDefault();
+                const name = this.querySelector('.item-name')?.innerText || '';
+                const img  = this.querySelector('img')?.src || '';
+                window.openWaModal(name, img);
+              }
             }
           };
 
@@ -880,6 +1268,219 @@
           `;
           shelf.appendChild(el);
         });
+        
+        attachInlineDescUploadButtons();
+        syncStaticSections();
+        if (!searchInitialized) {
+          initializeSearchFilter();
+          searchInitialized = true;
+        }
+      }
+
+      let searchInitialized = false;
+
+      function syncStaticSections() {
+        const products = JSON.parse(localStorage.getItem(SK) || '[]');
+        
+        document.querySelectorAll('.product-card-exact').forEach(card => {
+          const titleEl = card.querySelector('.product-title-exact');
+          if (!titleEl) return;
+          if (!card.dataset.origName) {
+            card.dataset.origName = titleEl.innerText.trim();
+          }
+          
+          const origName = card.dataset.origName;
+          const p = products.find(prod => 
+            (prod.name && prod.name.toLowerCase().trim() === origName.toLowerCase().trim())
+          );
+          
+          if (p) {
+            const img = card.querySelector('.product-img-box img');
+            if (img && p.url) img.src = p.url;
+            titleEl.innerText = p.name;
+            const priceEl = card.querySelector('.current');
+            if (priceEl && p.price) priceEl.innerText = '₹' + p.price;
+          }
+        });
+
+        let customCats = {};
+        try {
+          customCats = JSON.parse(localStorage.getItem('peekey_custom_categories') || '{}');
+        } catch(e) {}
+
+        document.querySelectorAll('.cat-card-exact').forEach(card => {
+          const titleEl = card.querySelector('h3');
+          if (!titleEl) return;
+          
+          const origName = titleEl.innerHTML.replace(/<br>/g, ' ').replace(/\s+/g, ' ').trim();
+          if (!card.dataset.origName) {
+            card.dataset.origName = origName;
+          }
+          
+          const catData = customCats[card.dataset.origName];
+          if (catData) {
+            if (catData.url) {
+              const img = card.querySelector('.cat-card-img');
+              if (img) img.src = catData.url;
+            }
+            if (catData.name) {
+              titleEl.innerHTML = catData.name.replace(' ', '<br>');
+            }
+          }
+        });
+      }
+
+      function initializeSearchFilter() {
+        const searchInput = document.querySelector('.ts-search input[type="text"]');
+        const searchBtn   = document.querySelector('.ts-search button[type="submit"]');
+        const categoryItems   = document.querySelectorAll('.search-dropdown-menu li');
+        const selectedCatText = document.getElementById('selected-category-text');
+
+        if (!searchInput) return;
+
+        // Inject no-results banner once
+        if (!document.getElementById('pk-no-results')) {
+          const banner = document.createElement('div');
+          banner.id = 'pk-no-results';
+          banner.style.cssText = [
+            'display:none',
+            'text-align:center',
+            'padding:60px 20px',
+            'font-family:"Outfit",sans-serif',
+            'color:#7a8099',
+            'font-size:1.05rem',
+          ].join(';');
+          banner.innerHTML = '<i class="fas fa-search" style="font-size:2.5rem;color:#cbd5e1;display:block;margin-bottom:14px;"></i>'
+            + '<strong style="color:#1a2035;font-size:1.2rem;">No products found</strong>'
+            + '<p style="margin-top:8px;">Try a different keyword or category.</p>';
+          const catalogAnchor = document.getElementById('catalog');
+          if (catalogAnchor) catalogAnchor.after(banner);
+        }
+
+        let activeCategory = 'All Categories';
+
+        categoryItems.forEach(item => {
+          item.addEventListener('click', () => {
+            activeCategory = item.getAttribute('data-value') || 'All Categories';
+            if (selectedCatText) {
+              selectedCatText.innerHTML = activeCategory + ' <i class="fas fa-chevron-down"></i>';
+            }
+            performSearch();
+          });
+        });
+
+        // Only search on button click or Enter — NOT on every keystroke
+        if (searchBtn) {
+          searchBtn.addEventListener('click', e => {
+            e.preventDefault();
+            performSearch();
+          });
+        }
+        searchInput.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); performSearch(); }
+        });
+        // Clear button: pressing Escape or emptying the box restores everything
+        searchInput.addEventListener('keyup', e => {
+          if (e.key === 'Escape' || searchInput.value.trim() === '') {
+            searchInput.value = '';
+            resetSearch();
+          }
+        });
+
+        function resetSearch() {
+          // Show all inventory sections and their items
+          document.querySelectorAll('.inventory-section').forEach(s => {
+            s.style.display = '';
+            s.querySelectorAll('.shelf-item').forEach(i => i.style.display = '');
+          });
+          document.querySelectorAll('.section-divider').forEach(d => d.style.display = '');
+          const bs = document.getElementById('best-sellers');
+          if (bs) {
+            bs.style.display = '';
+            bs.querySelectorAll('.product-card-exact').forEach(c => c.style.display = '');
+          }
+          const banner = document.getElementById('pk-no-results');
+          if (banner) banner.style.display = 'none';
+        }
+
+        function performSearch() {
+          const query = searchInput.value.toLowerCase().trim();
+
+          // Scroll to catalog so user sees results
+          if (query !== '') {
+            const catalogEl = document.getElementById('catalog');
+            if (catalogEl) catalogEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+
+          // ── Filter dynamic shelf items inside inventory sections ──
+          let totalVisible = 0;
+
+          const inventorySections = document.querySelectorAll('.inventory-section');
+          inventorySections.forEach(section => {
+            const shelfItems = section.querySelectorAll('.shelf-item');
+            if (shelfItems.length === 0) {
+              // Hide sections that have no items at all when searching
+              section.style.display = (query === '') ? '' : 'none';
+              return;
+            }
+
+            let sectionVisible = 0;
+            shelfItems.forEach(item => {
+              const name     = (item.getAttribute('data-name') || item.querySelector('.item-name')?.textContent || '').toLowerCase();
+              const category = (item.getAttribute('data-category') || '').toLowerCase().trim();
+
+              const matchesQuery    = (query === '') || name.includes(query);
+              const matchesCategory = (activeCategory === 'All Categories')
+                || category === activeCategory.toLowerCase().trim();
+
+              if (matchesQuery && matchesCategory) {
+                item.style.display = '';
+                sectionVisible++;
+                totalVisible++;
+              } else {
+                item.style.display = 'none';
+              }
+            });
+
+            // Hide/show the whole section + its dividers
+            const hide = (sectionVisible === 0 && query !== '');
+            section.style.display = hide ? 'none' : '';
+
+            // Hide adjacent .section-divider too
+            const next = section.nextElementSibling;
+            if (next && next.classList.contains('section-divider')) {
+              next.style.display = hide ? 'none' : '';
+            }
+          });
+
+          // ── Filter Best-Sellers static cards ──
+          const bestSellersSection = document.getElementById('best-sellers');
+          if (bestSellersSection) {
+            const staticCards = bestSellersSection.querySelectorAll('.product-card-exact');
+            let bsVisible = 0;
+            staticCards.forEach(card => {
+              const name     = (card.querySelector('.product-title-exact')?.textContent || '').toLowerCase();
+              const category = (card.getAttribute('data-category') || '').toLowerCase().trim();
+
+              const matchesQuery    = (query === '') || name.includes(query);
+              const matchesCategory = (activeCategory === 'All Categories')
+                || category === activeCategory.toLowerCase().trim();
+
+              if (matchesQuery && matchesCategory) {
+                card.style.display = '';
+                bsVisible++;
+                totalVisible++;
+              } else {
+                card.style.display = 'none';
+              }
+            });
+            bestSellersSection.style.display = (bsVisible === 0 && query !== '') ? 'none' : '';
+          }
+
+          // ── Show / hide no-results banner ──
+          const banner = document.getElementById('pk-no-results');
+          if (banner) banner.style.display = (totalVisible === 0 && query !== '') ? 'block' : 'none';
+        }
       }
 
       if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',load);
@@ -1119,14 +1720,29 @@
             <div class="ap-api-status warn" id="apConfigStatus">⚠ Not connected — paste API key above</div>
           </div>
 
-          <div class="ap-dropzone" id="apDropzone" onclick="document.getElementById('apFileInput').click()">
-            <i class="fas fa-image"></i>
-            <p><span>Click to browse</span> or drag &amp; drop</p>
-            <p style="font-size:.75rem;margin-top:4px">PNG · JPG · WEBP — multiple files OK</p>
-          </div>
-          <input type="file" id="apFileInput" accept="image/*" multiple>
+          <div class="ap-dual-dz">
+            <!-- Product Image Dropzone -->
+            <div class="ap-dz-wrap">
+              <span class="ap-dz-badge required">★ Product Image (Required)</span>
+              <div class="ap-dropzone" id="apDropzone" onclick="document.getElementById('apFileInput').click()" style="padding: 20px;">
+                <i class="fas fa-image" style="font-size: 1.8rem; margin-bottom: 6px;"></i>
+                <p style="font-size: 0.8rem;"><span>Click to browse</span> or drag &amp; drop</p>
+              </div>
+              <input type="file" id="apFileInput" accept="image/*">
+              <div class="ap-previews" id="apPreviews" style="margin-top: 8px;"></div>
+            </div>
 
-          <div class="ap-previews" id="apPreviews"></div>
+            <!-- Description Image Dropzone -->
+            <div class="ap-dz-wrap">
+              <span class="ap-dz-badge optional">✦ Description / Spec (Optional)</span>
+              <div class="ap-dropzone" id="apDescDropzone" onclick="document.getElementById('apDescFileInput').click()" style="padding: 20px;">
+                <i class="fas fa-file-invoice" style="font-size: 1.8rem; color: #f59e0b; margin-bottom: 6px;"></i>
+                <p style="font-size: 0.8rem;"><span style="color: #f59e0b;">Click to browse</span> or drag &amp; drop</p>
+              </div>
+              <input type="file" id="apDescFileInput" accept="image/*">
+              <div class="ap-previews" id="apDescPreviews" style="margin-top: 8px;"></div>
+            </div>
+          </div>
           <div class="ap-prog-wrap" id="apProgWrap"><div class="ap-prog-bar" id="apProgBar"></div></div>
 
           <div class="ap-actions">
@@ -1154,8 +1770,28 @@
     <button onclick="closeQuickEdit()" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:#999;"><i class="fas fa-times"></i></button>
     <h3 style="margin:0 0 16px 0;color:#ad1f35;font-size:1.15rem;font-weight:800;display:flex;align-items:center;gap:8px;"><i class="fas fa-edit"></i> Edit Product</h3>
     <input type="hidden" id="qeIndex">
-    <div style="text-align:center;margin-bottom:16px;background:#f8f9fa;border-radius:10px;padding:8px;">
-      <img id="qeImg" src="" style="height:90px;max-width:100%;object-fit:contain;border-radius:6px;">
+    <!-- Dual image slots for Quick Edit -->
+    <div class="qe-imgs-row">
+      <!-- Product Image Box -->
+      <div class="qe-img-box" onclick="document.getElementById('qeFileInput').click()">
+        <span class="qe-img-badge set" id="qeProdBadge">Set</span>
+        <img id="qeImg" src="" alt="Product">
+        <div class="qe-img-label">Product Image</div>
+      </div>
+      <input type="file" id="qeFileInput" accept="image/*" style="display:none;">
+
+      <!-- Description Image Box -->
+      <div class="qe-img-box" onclick="document.getElementById('qeDescFileInput').click()">
+        <span class="qe-img-badge missing" id="qeDescBadge">None</span>
+        <img id="qeDescImg" src="" alt="Description" style="background: #fafafa; border: 1px dashed #cbd5e1;">
+        <div class="qe-img-label">Description / Spec</div>
+      </div>
+      <input type="file" id="qeDescFileInput" accept="image/*" style="display:none;">
+    </div>
+    
+    <!-- Uploading / Status indicator -->
+    <div class="qe-uploading" id="qeUploading">
+      <i class="fas fa-spinner fa-spin"></i> Uploading to cloud...
     </div>
     <div style="margin-bottom:12px;">
       <label style="display:block;font-size:0.7rem;color:#7a8099;margin-bottom:4px;text-transform:uppercase;font-weight:700;">Product Name</label>
@@ -1361,28 +1997,61 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
 
   // ── Files ─────────────────────────────────────────────────
   let selFiles = [];
+  let selDescFile = null; // Description/spec file for new upload
+
+  // Primary Dropzone
   const dz = document.getElementById('apDropzone');
   const fi = document.getElementById('apFileInput');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('over'); addFiles([...e.dataTransfer.files]); });
+  fi.addEventListener('change', () => { addFiles([...fi.files]); fi.value = ''; });
 
-  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
-  dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
-  dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');addFiles([...e.dataTransfer.files]);});
-  fi.addEventListener('change',()=>{addFiles([...fi.files]);fi.value='';});
+  // Description Dropzone
+  const ddz = document.getElementById('apDescDropzone');
+  const dfi = document.getElementById('apDescFileInput');
+  ddz.addEventListener('dragover', e => { e.preventDefault(); ddz.classList.add('over'); });
+  ddz.addEventListener('dragleave', () => ddz.classList.remove('over'));
+  ddz.addEventListener('drop', e => { e.preventDefault(); ddz.classList.remove('over'); addDescFile(e.dataTransfer.files[0]); });
+  dfi.addEventListener('change', () => { if (dfi.files[0]) addDescFile(dfi.files[0]); dfi.value = ''; });
 
-  function addFiles(files){
-    selFiles=[...selFiles,...files.filter(f=>f.type.startsWith('image/'))];
+  function addFiles(files) {
+    selFiles = [...selFiles, ...files.filter(f => f.type.startsWith('image/'))];
     renderPreviews();
-    document.getElementById('apUploadBtn').disabled = selFiles.length===0;
+    document.getElementById('apUploadBtn').disabled = selFiles.length === 0;
   }
-  function renderPreviews(){
-    const strip=document.getElementById('apPreviews');
-    strip.innerHTML=selFiles.map((f,i)=>`
+  function renderPreviews() {
+    const strip = document.getElementById('apPreviews');
+    strip.innerHTML = selFiles.map((f, i) => `
       <div class="ap-prev-item">
         <img src="${URL.createObjectURL(f)}">
         <button class="ap-prev-remove" onclick="apRemoveFile(${i})"><i class="fas fa-xmark"></i></button>
       </div>`).join('');
   }
-  window.apRemoveFile=function(i){selFiles.splice(i,1);renderPreviews();document.getElementById('apUploadBtn').disabled=selFiles.length===0;};
+  window.apRemoveFile = function (i) {
+    selFiles.splice(i, 1);
+    renderPreviews();
+    document.getElementById('apUploadBtn').disabled = selFiles.length === 0;
+  };
+
+  function addDescFile(f) {
+    if (!f || !f.type.startsWith('image/')) return;
+    selDescFile = f;
+    renderDescPreview();
+  }
+  function renderDescPreview() {
+    const strip = document.getElementById('apDescPreviews');
+    if (!selDescFile) { strip.innerHTML = ''; return; }
+    strip.innerHTML = `
+      <div class="ap-prev-item">
+        <img src="${URL.createObjectURL(selDescFile)}">
+        <button class="ap-prev-remove" onclick="apRemoveDescFile()"><i class="fas fa-xmark"></i></button>
+      </div>`;
+  }
+  window.apRemoveDescFile = function () {
+    selDescFile = null;
+    renderDescPreview();
+  };
 
   // ── Upload via imgbb ───────────────────────────────────────
   window.apUpload = async function(){
@@ -1402,6 +2071,24 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
 
     const products=getProducts();
     let done=0;
+
+    // First upload description file if selected
+    let descUrl = '';
+    if (selDescFile) {
+      try {
+        const db64 = await new Promise((r,j)=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.onerror=j;fr.readAsDataURL(selDescFile);});
+        const dfd = new FormData();
+        dfd.append('key', key);
+        dfd.append('image', db64.split(',')[1]);
+        dfd.append('name', 'desc-' + name.replace(/\s+/g,'-'));
+        const dres = await fetch('https://api.imgbb.com/1/upload', {method:'POST', body:dfd});
+        const ddata = await dres.json();
+        if (ddata.success && ddata.data?.url) {
+          descUrl = ddata.data.display_url || ddata.data.url;
+        }
+      } catch(e) { console.error("Error uploading description image", e); }
+    }
+
     for(const file of selFiles){
       try{
         const b64 = await new Promise((r,j)=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.onerror=j;fr.readAsDataURL(file);});
@@ -1412,9 +2099,16 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
         const res=await fetch('https://api.imgbb.com/1/upload',{method:'POST',body:fd});
         const data=await res.json();
         if(data.success&&data.data?.url){
-          const p={id:data.data.id,name,price,category:cat,url:data.data.display_url||data.data.url,at:Date.now()};
+          const p={
+            id:data.data.id,
+            name,
+            price,
+            category:cat,
+            url:data.data.display_url||data.data.url,
+            descUrl: descUrl || undefined,
+            at:Date.now()
+          };
           products.push(p);
-          injectToPage(p);
         } else { apToast('Error: '+(data.error?.message||'Check API key'),'err'); }
       }catch(e){apToast('Network error during upload','err');}
       done++;
@@ -1422,7 +2116,9 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
     }
     saveProducts(products);
     selFiles=[];
+    selDescFile=null;
     renderPreviews();
+    renderDescPreview();
     document.getElementById('apProdName').value='';
     document.getElementById('apProdPrice').value='';
     btn.disabled=false;btn.innerHTML='<i class="fas fa-cloud-upload-alt"></i> Upload to Cloud';
@@ -1431,24 +2127,7 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
     renderApGrid();updateApStats();
   };
 
-  // ── Inject to live page ────────────────────────────────────
-  function injectToPage(p){
-    const catMap={'Home Appliances':0,'Kitchenware':1,'Crockery & Dining':2,'Pooja & Devotional':3,'Home Essentials':4};
-    const shelves=document.querySelectorAll('.shelf-container');
-    const idx=catMap[p.category]??0;
-    const shelf=shelves[idx]||shelves[0];
-    if(shelf){
-      const item=document.createElement('div');
-      item.className='shelf-item pk-cloud-item';
-      item.dataset.pkid = p.id;
-      item.innerHTML=`
-        <div class="item-image-placeholder"><img src="${p.url}" alt="${p.name}" loading="lazy"></div>
-        <div class="item-name">${p.name}</div>
-        ${p.price ? `<div class="item-price" style="color:#ad1f35;font-weight:700;font-size:0.85rem;margin-top:4px;text-align:center;">₹${p.price}</div>` : ''}
-      `;
-      shelf.appendChild(item);
-    }
-  }
+
 
   // ── Grid ──────────────────────────────────────────────────
   function renderApGrid(){
@@ -1517,12 +2196,7 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
     window.dispatchEvent(new StorageEvent('storage',{key:SK}));
   }
 
-  // ── Load cloud uploads on page load ───────────────────────
-  function loadCloudUploads(){
-    getProducts().forEach(p=>injectToPage(p));
-  }
-  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',loadCloudUploads);}
-  else{loadCloudUploads();}
+
 
   // ── Toast ─────────────────────────────────────────────────
   window.apToast=function(msg,type='ok'){
@@ -1535,12 +2209,65 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
   };
 
   // ── Quick Edit Modal ───────────────────────────────────────
+  let qeNewProdFile = null;
+  let qeNewDescFile = null;
+
+  // File pickers within the modal
+  const qefi = document.getElementById('qeFileInput');
+  const qedfi = document.getElementById('qeDescFileInput');
+
+  qefi.addEventListener('change', () => {
+    const f = qefi.files[0];
+    if (f && f.type.startsWith('image/')) {
+      qeNewProdFile = f;
+      document.getElementById('qeImg').src = URL.createObjectURL(f);
+      const badge = document.getElementById('qeProdBadge');
+      badge.textContent = 'New';
+      badge.className = 'qe-img-badge set';
+    }
+    qefi.value = '';
+  });
+
+  qedfi.addEventListener('change', () => {
+    const f = qedfi.files[0];
+    if (f && f.type.startsWith('image/')) {
+      qeNewDescFile = f;
+      document.getElementById('qeDescImg').src = URL.createObjectURL(f);
+      const badge = document.getElementById('qeDescBadge');
+      badge.textContent = 'New';
+      badge.className = 'qe-img-badge set';
+    }
+    qedfi.value = '';
+  });
+
   window.openQuickEdit = function(index) {
     const products = getProducts();
     const p = products[index];
     if(!p) return;
+    
+    // Clear temporary uploads
+    qeNewProdFile = null;
+    qeNewDescFile = null;
+    document.getElementById('qeUploading').style.display = 'none';
+
     document.getElementById('qeIndex').value = index;
-    document.getElementById('qeImg').src = p.url;
+    document.getElementById('qeImg').src = p.url || '';
+    
+    const descImg = document.getElementById('qeDescImg');
+    const descBadge = document.getElementById('qeDescBadge');
+    if (p.descUrl) {
+      descImg.src = p.descUrl;
+      descBadge.textContent = 'Set';
+      descBadge.className = 'qe-img-badge set';
+    } else {
+      descImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%23cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>';
+      descBadge.textContent = 'None';
+      descBadge.className = 'qe-img-badge missing';
+    }
+    
+    document.getElementById('qeProdBadge').textContent = 'Set';
+    document.getElementById('qeProdBadge').className = 'qe-img-badge set';
+
     document.getElementById('qeName').value = p.name;
     document.getElementById('qePrice').value = p.price || '';
     document.getElementById('qeCat').value = p.category;
@@ -1551,19 +2278,74 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
     document.getElementById('quickEditOverlay').style.display = 'none';
   };
 
-  window.saveQuickEdit = function() {
+  window.saveQuickEdit = async function() {
     const idx = parseInt(document.getElementById('qeIndex').value);
     const products = getProducts();
-    if(products[idx]) {
-      products[idx].name = document.getElementById('qeName').value.trim();
-      products[idx].price = document.getElementById('qePrice').value.trim();
-      products[idx].category = document.getElementById('qeCat').value;
-      saveProducts(products);
-      apToast('Product updated!','ok');
-      renderApGrid();
-      updateApStats();
-      closeQuickEdit();
+    const p = products[idx];
+    if(!p) return;
+
+    const key = localStorage.getItem(API_KEY_SK)||'';
+    const nameVal = document.getElementById('qeName').value.trim();
+    if(!nameVal) { apToast('Product name cannot be empty!','err'); return; }
+
+    // If custom image files are selected, we must upload them first!
+    const upIndicator = document.getElementById('qeUploading');
+    const saveBtn = document.querySelector('#quickEditOverlay button[onclick="saveQuickEdit()"]');
+    
+    if (qeNewProdFile || qeNewDescFile) {
+      if(!key) {
+        apToast('Paste your imgbb API key in the admin panel first!','err');
+        return;
+      }
+      upIndicator.style.display = 'flex';
+      if(saveBtn) saveBtn.disabled = true;
+
+      // Upload product image if changed
+      if (qeNewProdFile) {
+        try {
+          const b64 = await new Promise((r,j)=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.onerror=j;fr.readAsDataURL(qeNewProdFile);});
+          const fd = new FormData();
+          fd.append('key', key);
+          fd.append('image', b64.split(',')[1]);
+          fd.append('name', nameVal.replace(/\s+/g,'-'));
+          const res = await fetch('https://api.imgbb.com/1/upload', {method:'POST', body:fd});
+          const data = await res.json();
+          if (data.success && data.data?.url) {
+            p.url = data.data.display_url || data.data.url;
+          }
+        } catch(e) { apToast('Error uploading new product image', 'err'); }
+      }
+
+      // Upload description image if changed
+      if (qeNewDescFile) {
+        try {
+          const b64 = await new Promise((r,j)=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.onerror=j;fr.readAsDataURL(qeNewDescFile);});
+          const fd = new FormData();
+          fd.append('key', key);
+          fd.append('image', b64.split(',')[1]);
+          fd.append('name', 'desc-' + nameVal.replace(/\s+/g,'-'));
+          const res = await fetch('https://api.imgbb.com/1/upload', {method:'POST', body:fd});
+          const data = await res.json();
+          if (data.success && data.data?.url) {
+            p.descUrl = data.data.display_url || data.data.url;
+          }
+        } catch(e) { apToast('Error uploading new description image', 'err'); }
+      }
     }
+
+    p.name = nameVal;
+    p.price = document.getElementById('qePrice').value.trim();
+    p.category = document.getElementById('qeCat').value;
+    
+    saveProducts(products);
+    apToast('Product updated successfully!','ok');
+    
+    // Refresh admin display & close
+    renderApGrid();
+    updateApStats();
+    if(saveBtn) saveBtn.disabled = false;
+    upIndicator.style.display = 'none';
+    closeQuickEdit();
   };
 
   window.deleteQuickEdit = function() {
