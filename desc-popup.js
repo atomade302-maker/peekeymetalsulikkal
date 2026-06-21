@@ -527,6 +527,30 @@
       color: #64748b;
       line-height: 1.4;
     }
+    .pk-main-delete-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid #e2e8f0;
+      color: #ad1f35;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      transition: all 0.2s;
+      z-index: 10;
+    }
+    .pk-main-delete-btn:hover {
+      background: #ad1f35;
+      color: #ffffff;
+      transform: scale(1.1);
+    }
   `;
   document.head.appendChild(style);
 
@@ -542,6 +566,7 @@
           <div class="pk-detail-main-display">
             <img id="pk-gallery-main-img" src="" alt="Product">
             <video id="pk-gallery-main-video" src="" controls style="display:none"></video>
+            <button id="pk-main-display-delete-btn" class="pk-main-delete-btn" title="Delete current media" style="display:none;"><i class="fas fa-trash-alt"></i></button>
           </div>
           <div class="pk-detail-thumbnails">
             <!-- Main Image -->
@@ -674,6 +699,7 @@
   /* ───────────────────────────── REFS ─────────────────────────── */
   const mainImg     = document.getElementById('pk-gallery-main-img');
   const mainVideo   = document.getElementById('pk-gallery-main-video');
+  const mainDeleteBtn = document.getElementById('pk-main-display-delete-btn');
   const closeBtn    = document.getElementById('pk-detail-close');
   const catEl       = document.getElementById('pk-detail-cat');
   const titleEl     = document.getElementById('pk-detail-title');
@@ -718,6 +744,7 @@
   const cancelDescBtn = document.getElementById('pk-cancel-desc-btn');
 
   let currentProduct = null;
+  let originalFallbackImg = '';
 
   /* ───────────────────────────── HELPERS ──────────────────────── */
   function adminLoggedIn() {
@@ -784,13 +811,26 @@
     return null;
   }
 
+
   function saveProductField(name, field, value) {
     try {
       const products = JSON.parse(localStorage.getItem(SK) || '[]');
       let p = products.find(x => x.name && x.name.toLowerCase().trim() === name.toLowerCase().trim());
       if (!p) {
-        // Create new dynamic catalog product if it was a static layout product
-        p = { id: 'static-' + Date.now(), name, category: 'Home Appliances', url: '', at: Date.now() };
+        // Create new dynamic catalog product if it was a static layout product, copying current fields
+        p = {
+          id: 'static-' + Date.now(),
+          name: name,
+          category: currentProduct ? (currentProduct.category || 'Home Appliances') : 'Home Appliances',
+          url: currentProduct ? (currentProduct.url || '') : '',
+          price: currentProduct ? (currentProduct.price || '') : '',
+          img1: currentProduct ? (currentProduct.img1 || '') : '',
+          img2: currentProduct ? (currentProduct.img2 || '') : '',
+          video: currentProduct ? (currentProduct.video || '') : '',
+          specs: currentProduct ? (currentProduct.specs || '') : '',
+          description: currentProduct ? (currentProduct.description || '') : '',
+          at: Date.now()
+        };
         products.push(p);
       }
       p[field] = value;
@@ -863,6 +903,7 @@
 
   /* ───────────────────────────── OPEN / CLOSE ─────────────────── */
   function openDetailModal(name, mainImgUrl, category) {
+    if (mainImgUrl) originalFallbackImg = mainImgUrl;
     // Reset any open edit states to view mode
     if (titleDisplayBox) titleDisplayBox.style.display = 'flex';
     if (titleEditBox) titleEditBox.style.display = 'none';
@@ -984,6 +1025,13 @@
     if (adminEditSpecs) adminEditSpecs.style.display = isAdmin ? 'inline-flex' : 'none';
     if (adminEditDesc) adminEditDesc.style.display = isAdmin ? 'inline-flex' : 'none';
 
+    // Toggle delete button
+    if (mainDeleteBtn) {
+      const activeSlot = document.querySelector('.pk-thumb-slot.active');
+      const hasMedia = activeSlot && (!activeSlot.classList.contains('placeholder-icon') || activeSlot.id === 'pk-thumb-url' || activeSlot.classList.contains('has-video'));
+      mainDeleteBtn.style.display = (isAdmin && hasMedia) ? 'flex' : 'none';
+    }
+
     // Show Overlay
     overlay.classList.add('active');
   }
@@ -1063,8 +1111,94 @@
           mainImg.src = currentProduct.url;
         }
       }
+
+      // Update delete button visibility on slot change
+      if (mainDeleteBtn) {
+        const isAdmin = adminLoggedIn();
+        const hasMedia = !this.classList.contains('placeholder-icon') || this.id === 'pk-thumb-url' || this.classList.contains('has-video');
+        mainDeleteBtn.style.display = (isAdmin && hasMedia) ? 'flex' : 'none';
+      }
     });
   });
+
+  // Touch Swiping logic for main gallery display
+  let touchStartX = 0;
+  let touchEndX = 0;
+  const mainDisplay = document.querySelector('.pk-detail-main-display');
+
+  if (mainDisplay) {
+    mainDisplay.addEventListener('touchstart', function (e) {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    mainDisplay.addEventListener('touchend', function (e) {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+  }
+
+  function handleSwipe() {
+    const minSwipeDistance = 50; // pixels
+    const swipeDistance = touchEndX - touchStartX;
+    if (Math.abs(swipeDistance) < minSwipeDistance) return;
+
+    // Get all slots that have media (not placeholders)
+    const slots = Array.from(document.querySelectorAll('.pk-thumb-slot'));
+    const activeIndex = slots.findIndex(s => s.classList.contains('active'));
+    if (activeIndex === -1) return;
+
+    if (swipeDistance < 0) {
+      // Swiped Left -> Next media
+      let nextIndex = activeIndex;
+      // Find the next slot that is NOT a placeholder (or has media)
+      for (let i = 1; i < slots.length; i++) {
+        const idx = (activeIndex + i) % slots.length;
+        if (!slots[idx].classList.contains('placeholder-icon') || slots[idx].id === 'pk-thumb-url' || slots[idx].classList.contains('has-video')) {
+          nextIndex = idx;
+          break;
+        }
+      }
+      if (nextIndex !== activeIndex) {
+        slots[nextIndex].click();
+      }
+    } else {
+      // Swiped Right -> Previous media
+      let prevIndex = activeIndex;
+      for (let i = 1; i < slots.length; i++) {
+        const idx = (activeIndex - i + slots.length) % slots.length;
+        if (!slots[idx].classList.contains('placeholder-icon') || slots[idx].id === 'pk-thumb-url' || slots[idx].classList.contains('has-video')) {
+          prevIndex = idx;
+          break;
+        }
+      }
+      if (prevIndex !== activeIndex) {
+        slots[prevIndex].click();
+      }
+    }
+  }
+
+  // Delete current active slot media
+  if (mainDeleteBtn) {
+    mainDeleteBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+
+      if (!currentProduct) return;
+      const activeSlot = document.querySelector('.pk-thumb-slot.active');
+      if (!activeSlot) return;
+
+      const slotName = activeSlot.dataset.slot;
+      if (!confirm(`Are you sure you want to delete the media in this slot?`)) return;
+
+      saveProductField(currentProduct.name, slotName, '');
+      currentProduct[slotName] = '';
+
+      showToast('🗑️ Media deleted successfully!');
+      
+      // Update UI thumbnails & display
+      openDetailModal(currentProduct.name, originalFallbackImg, currentProduct.category);
+    });
+  }
 
   // Tab Header switching
   document.querySelectorAll('.pk-tab-btn').forEach(btn => {

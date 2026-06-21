@@ -2212,6 +2212,7 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
       } catch(e) { console.error("Error uploading description image", e); }
     }
 
+    const uploadedUrls = [];
     for(const file of selFiles){
       try{
         const b64 = await new Promise((r,j)=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.onerror=j;fr.readAsDataURL(file);});
@@ -2224,20 +2225,49 @@ document.getElementById('signInOverlay').addEventListener('click', e=>{ if(e.tar
         if(data.success && data.data?.url){
           // Prefer display_url (direct CDN link), fall back to url
           const imgUrl = data.data.display_url || data.data.medium?.url || data.data.url;
-          const p={
-            id:data.data.id,
-            name,
-            price,
-            category:cat,
-            url: imgUrl,
-            descUrl: descUrl || undefined,
-            at:Date.now()
-          };
-          products.push(p);
+          uploadedUrls.push(imgUrl);
         } else { apToast('Error: '+(data.error?.message||'Check API key'),'err'); }
       }catch(e){apToast('Network error during upload','err');}
       done++;
       pb.style.width=Math.round(done/selFiles.length*100)+'%';
+    }
+
+    if (uploadedUrls.length > 0) {
+      let p = products.find(prod => prod.name && prod.name.toLowerCase().trim() === name.toLowerCase().trim());
+      if (!p) {
+        p = {
+          id: 'prod-' + Date.now(),
+          name,
+          price,
+          category: cat,
+          url: '',
+          at: Date.now()
+        };
+        products.push(p);
+      } else {
+        if (price) p.price = price;
+        if (cat) p.category = cat;
+      }
+
+      if (descUrl) p.descUrl = descUrl;
+
+      // Assign uploaded URLs to slots
+      if (uploadedUrls.length > 1) {
+        p.url = uploadedUrls[0] || p.url;
+        p.img1 = uploadedUrls[1] || p.img1;
+        p.img2 = uploadedUrls[2] || p.img2;
+      } else if (uploadedUrls.length === 1) {
+        const isLocalOrEmpty = (src) => !src || (!src.startsWith('http') && !src.startsWith('data:'));
+        if (isLocalOrEmpty(p.url)) {
+          p.url = uploadedUrls[0];
+        } else if (isLocalOrEmpty(p.img1)) {
+          p.img1 = uploadedUrls[0];
+        } else if (isLocalOrEmpty(p.img2)) {
+          p.img2 = uploadedUrls[0];
+        } else {
+          p.url = uploadedUrls[0];
+        }
+      }
     }
     saveProducts(products);
     selFiles=[];

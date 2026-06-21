@@ -497,6 +497,7 @@ async function doUpload() {
     } catch(e) { console.error('Error uploading description image:', e); }
   }
 
+  const uploadedUrls = [];
   for (const file of selFiles) {
     try {
       const b64 = await toBase64(file);
@@ -507,22 +508,52 @@ async function doUpload() {
       const r = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: fd });
       const d = await r.json();
       if (d.success && d.data?.url) {
-        const price = document.getElementById('uPrice').value.trim();
-        products.push({
-          id: d.data.id,
-          name,
-          price,
-          category: cat,
-          url: d.data.display_url || d.data.url,
-          descUrl: descUrl || undefined,
-          at: Date.now()
-        });
+        const imgUrl = d.data.display_url || d.data.medium?.url || d.data.url;
+        uploadedUrls.push(imgUrl);
       } else {
         showToast('Upload error: ' + (d.error?.message || 'Check API key'), 'err');
       }
     } catch(e) { showToast('Network error. Check internet.', 'err'); }
     done++;
     pbf.style.width = Math.round(done / selFiles.length * 100) + '%';
+  }
+
+  if (uploadedUrls.length > 0) {
+    let p = products.find(prod => prod.name && prod.name.toLowerCase().trim() === name.toLowerCase().trim());
+    const price = document.getElementById('uPrice').value.trim();
+    if (!p) {
+      p = {
+        id: 'prod-' + Date.now(),
+        name,
+        price,
+        category: cat,
+        url: '',
+        at: Date.now()
+      };
+      products.push(p);
+    } else {
+      if (price) p.price = price;
+      if (cat) p.category = cat;
+    }
+
+    if (descUrl) p.descUrl = descUrl;
+
+    if (uploadedUrls.length > 1) {
+      p.url = uploadedUrls[0] || p.url;
+      p.img1 = uploadedUrls[1] || p.img1;
+      p.img2 = uploadedUrls[2] || p.img2;
+    } else if (uploadedUrls.length === 1) {
+      const isLocalOrEmpty = (src) => !src || (!src.startsWith('http') && !src.startsWith('data:'));
+      if (isLocalOrEmpty(p.url)) {
+        p.url = uploadedUrls[0];
+      } else if (isLocalOrEmpty(p.img1)) {
+        p.img1 = uploadedUrls[0];
+      } else if (isLocalOrEmpty(p.img2)) {
+        p.img2 = uploadedUrls[0];
+      } else {
+        p.url = uploadedUrls[0];
+      }
+    }
   }
 
   saveProducts(products);
