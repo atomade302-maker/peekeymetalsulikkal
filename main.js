@@ -129,7 +129,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         <p class="product-desc">Experience maximum quality and durability with this premium item. Designed with traditional aesthetics and modern robustness, it makes a perfect addition to your home.</p>
                         <div class="product-price">
                             <span class="current">₹0.00</span>
-                            <span class="old" style="display: none;">₹0.00</span>
                         </div>
                         <button class="btn btn-primary modal-cart-btn"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
                     </div>
@@ -177,12 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             activeProductTitle = title;
 
-            if (oldPrice) {
-                modalPriceOld.innerText = oldPrice;
-                modalPriceOld.style.display = 'inline-block';
-            } else {
-                modalPriceOld.style.display = 'none';
-            }
+            if (modalPriceOld) modalPriceOld.style.display = 'none';
 
             // Open Modal
             modal.classList.add('active');

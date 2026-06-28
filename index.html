@@ -221,6 +221,45 @@
 </head>
 <body>
 
+    <!-- Subtle Under Development Badge (bottom-right floating chip) -->
+    <div id="dev-badge" style="
+        position: fixed;
+        bottom: 80px;
+        right: 18px;
+        z-index: 99998;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(15,26,20,0.92);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        color: #fff;
+        padding: 9px 14px 9px 10px;
+        border-radius: 50px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border: 1px solid rgba(255,255,255,0.12);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+        cursor: default;
+        animation: devSlideIn 0.5s ease 1s both;
+        transition: opacity 0.4s ease;
+        letter-spacing: 0.2px;
+    ">
+        <span style="width:7px;height:7px;background:#f59e0b;border-radius:50%;flex-shrink:0;animation:devBlink 1.6s ease-in-out infinite;"></span>
+        <span>Website under development</span>
+        <button onclick="var b=document.getElementById('dev-badge');b.style.opacity='0';setTimeout(function(){b.style.display='none'},400);"
+            style="background:rgba(255,255,255,0.1);border:none;color:rgba(255,255,255,0.7);width:18px;height:18px;border-radius:50%;cursor:pointer;font-size:0.7rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;margin-left:2px;line-height:1;"
+            title="Dismiss">&times;</button>
+    </div>
+    <style>
+        @keyframes devBlink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.3;transform:scale(0.6)} }
+        @keyframes devSlideIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        @media (max-width: 576px) {
+            #dev-badge { bottom: 70px; right: 12px; font-size: 0.7rem; padding: 7px 10px 7px 8px; }
+        }
+    </style>
+
     <!-- Preloader -->
     <div id="preloader">
         <div class="preloader-logo-wrap">
@@ -591,11 +630,7 @@
                     </div>
                     <div class="product-info-box">
                         <h4 class="product-title-exact">Preethi Zodiac Mixer Grinder 750W</h4>
-                        <div class="product-price-exact">
-                            <span class="current">₹5,999</span>
-                            <span class="old">₹8,500</span>
-                            <span class="discount">(25% OFF)</span>
-                        </div>
+                        <div class="product-price-exact"></div>
                         <div class="product-meta-exact">
                             <div class="rating"><i class="fas fa-star"></i> 4.7 <span>(2.1k)</span></div>
                             <div style="display:flex;gap:5px;">
@@ -613,11 +648,7 @@
                     </div>
                     <div class="product-info-box">
                         <h4 class="product-title-exact">Hawkins Contura Pressure Cooker 3L</h4>
-                        <div class="product-price-exact">
-                            <span class="current">₹1,249</span>
-                            <span class="old">₹1,650</span>
-                            <span class="discount">(22% OFF)</span>
-                        </div>
+                        <div class="product-price-exact"></div>
                         <div class="product-meta-exact">
                             <div class="rating"><i class="fas fa-star"></i> 4.8 <span>(1.5k)</span></div>
                             <div style="display:flex;gap:5px;">
@@ -635,11 +666,7 @@
                     </div>
                     <div class="product-info-box">
                         <h4 class="product-title-exact">Prestige Omega Deluxe Granite Tawa 28cm</h4>
-                        <div class="product-price-exact">
-                            <span class="current">₹949</span>
-                            <span class="old">₹1,550</span>
-                            <span class="discount">(30% OFF)</span>
-                        </div>
+                        <div class="product-price-exact"></div>
                         <div class="product-meta-exact">
                             <div class="rating"><i class="fas fa-star"></i> 4.5 <span>(980)</span></div>
                             <div style="display:flex;gap:5px;">
@@ -657,11 +684,7 @@
                     </div>
                     <div class="product-info-box">
                         <h4 class="product-title-exact">Philips HD9252/90 Air Fryer</h4>
-                        <div class="product-price-exact">
-                            <span class="current">₹8,995</span>
-                            <span class="old">₹12,999</span>
-                            <span class="discount">(21% OFF)</span>
-                        </div>
+                        <div class="product-price-exact"></div>
                         <div class="product-meta-exact">
                             <div class="rating"><i class="fas fa-star"></i> 4.8 <span>(1.2k)</span></div>
                             <div style="display:flex;gap:5px;">
@@ -717,37 +740,63 @@
     <section class="section-padding">
         <div class="container">
             <h2 class="section-title-center">What Our Customers Say <i class="fas fa-quote-right" style="color:var(--red); font-size:1rem; margin-left:10px; vertical-align:top;"></i></h2>
-            
+
+            <!-- Google Rating Summary Bar -->
+            <div style="display:flex; justify-content:center; align-items:center; gap:14px; margin-bottom:40px; flex-wrap:wrap;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="36" height="36"><path fill="#4285F4" d="M24 9.5c3.1 0 5.9 1.1 8.1 2.9l6.1-6.1C34.5 2.8 29.5 1 24 1 14.9 1 7.2 6.4 3.7 14.1l7.1 5.5C12.5 13.3 17.8 9.5 24 9.5z"/><path fill="#34A853" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.4c-.5 2.8-2.1 5.1-4.5 6.7l7 5.4c4.1-3.8 6.5-9.3 6.2-16.1z"/><path fill="#FBBC05" d="M10.8 28.4A14.3 14.3 0 0 1 9.5 24c0-1.5.3-3 .8-4.4l-7.1-5.5A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l8.2-6.4z"/><path fill="#EA4335" d="M24 47c5.5 0 10.1-1.8 13.5-4.9l-7-5.4c-1.9 1.3-4.3 2-6.5 2-6.2 0-11.5-3.8-13.2-9.3l-8.2 6.4C7.2 41.6 14.9 47 24 47z"/></svg>
+                <div>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span style="font-size:1.6rem; font-weight:900; color:#111;">5.0</span>
+                        <div style="color:#f59e0b; font-size:1.1rem;">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p style="font-size:0.8rem; color:#777; margin:0;">Based on Google Reviews</p>
+                </div>
+                <a href="https://www.google.com/search?q=peekay+metals+ulikkal" target="_blank" style="margin-left:8px; font-size:0.8rem; color:var(--red); font-weight:700; text-decoration:underline;">View on Google</a>
+            </div>
+
             <div class="test-grid-exact">
+                <!-- Real Google Review 1: Shifin K. Ibrahim -->
                 <div class="test-card-exact">
                     <div class="test-header">
-                        <div class="test-avatar" style="background-color: #ddd;"></div>
+                        <div class="test-avatar" style="background:linear-gradient(135deg,#4285F4,#34A853);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;">S</div>
                         <div class="test-user">
-                            <h4>Rohit Sharma</h4>
+                            <h4>Shifin K. Ibrahim <span style="font-size:0.68rem;color:#4285F4;font-weight:600;">Local Guide</span></h4>
                             <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
                         </div>
                     </div>
-                    <p>"Amazing collection and original products. Delivery was super fast!"</p>
+                    <p>"Good"</p>
+                    <div style="display:flex;align-items:center;gap:5px;margin-top:10px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="13" height="13"><path fill="#4285F4" d="M24 9.5c3.1 0 5.9 1.1 8.1 2.9l6.1-6.1C34.5 2.8 29.5 1 24 1 14.9 1 7.2 6.4 3.7 14.1l7.1 5.5C12.5 13.3 17.8 9.5 24 9.5z"/><path fill="#34A853" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.4c-.5 2.8-2.1 5.1-4.5 6.7l7 5.4c4.1-3.8 6.5-9.3 6.2-16.1z"/><path fill="#FBBC05" d="M10.8 28.4A14.3 14.3 0 0 1 9.5 24c0-1.5.3-3 .8-4.4l-7.1-5.5A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l8.2-6.4z"/><path fill="#EA4335" d="M24 47c5.5 0 10.1-1.8 13.5-4.9l-7-5.4c-1.9 1.3-4.3 2-6.5 2-6.2 0-11.5-3.8-13.2-9.3l-8.2 6.4C7.2 41.6 14.9 47 24 47z"/></svg>
+                        <span style="font-size:0.7rem;color:#888;">Google Review · 2 years ago</span>
+                    </div>
                 </div>
+
+                <!-- Real Google Review 2: Abhiram Anil -->
                 <div class="test-card-exact">
                     <div class="test-header">
-                        <div class="test-avatar" style="background-color: #ddd;"></div>
+                        <div class="test-avatar" style="background:linear-gradient(135deg,#EA4335,#FBBC05);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;">A</div>
                         <div class="test-user">
-                            <h4>Neha Patel</h4>
+                            <h4>Abhiram Anil</h4>
                             <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
                         </div>
                     </div>
-                    <p>"Best place to buy cookware and appliances. Highly recommended!"</p>
+                    <p>"Will get any products for home appliances, electronics and cookery. It is a big shop in Ulikkal — available each and every item."</p>
+                    <div style="display:flex;align-items:center;gap:5px;margin-top:10px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="13" height="13"><path fill="#4285F4" d="M24 9.5c3.1 0 5.9 1.1 8.1 2.9l6.1-6.1C34.5 2.8 29.5 1 24 1 14.9 1 7.2 6.4 3.7 14.1l7.1 5.5C12.5 13.3 17.8 9.5 24 9.5z"/><path fill="#34A853" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.4c-.5 2.8-2.1 5.1-4.5 6.7l7 5.4c4.1-3.8 6.5-9.3 6.2-16.1z"/><path fill="#FBBC05" d="M10.8 28.4A14.3 14.3 0 0 1 9.5 24c0-1.5.3-3 .8-4.4l-7.1-5.5A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l8.2-6.4z"/><path fill="#EA4335" d="M24 47c5.5 0 10.1-1.8 13.5-4.9l-7-5.4c-1.9 1.3-4.3 2-6.5 2-6.2 0-11.5-3.8-13.2-9.3l-8.2 6.4C7.2 41.6 14.9 47 24 47z"/></svg>
+                        <span style="font-size:0.7rem;color:#888;">Verified Google Review · 6 days ago</span>
+                    </div>
                 </div>
-                <div class="test-card-exact">
-                    <div class="test-header">
-                        <div class="test-avatar" style="background-color: #ddd;"></div>
-                        <div class="test-user">
-                            <h4>Arun Varma</h4>
-                            <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                        </div>
-                    </div>
-                    <p>"Great offers and excellent customer support. Very happy!"</p>
+
+                <!-- Google CTA card -->
+                <div class="test-card-exact" style="background:linear-gradient(135deg,#0f1a14,#1a2e20);color:#fff;justify-content:center;align-items:center;display:flex;flex-direction:column;text-align:center;">
+                    <div style="font-size:2.2rem;margin-bottom:8px;">⭐</div>
+                    <h4 style="color:#fff;font-size:1.05rem;font-weight:800;margin-bottom:8px;">Rated 5.0 on Google</h4>
+                    <p style="color:rgba(255,255,255,0.75);font-size:0.85rem;margin-bottom:16px;">Your feedback helps us serve you better. Share your experience with Peekey!</p>
+                    <a href="https://www.google.com/search?q=peekay+metals+ulikkal" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--red);color:#fff;padding:9px 20px;border-radius:20px;font-size:0.8rem;font-weight:700;text-decoration:none;transition:0.3s;" onmouseover="this.style.background='#a00d24'" onmouseout="this.style.background='var(--red)'">
+                        <i class="fas fa-star"></i> Leave a Review
+                    </a>
                 </div>
             </div>
         </div>
@@ -987,9 +1036,12 @@
                         <i class="fas fa-envelope" style="color: var(--red); flex-shrink: 0; font-size: 0.9rem;"></i>
                         <a href="mailto:anvarsadikh786@gmail.com" style="color: rgba(255,255,255,0.72); font-size: 0.8rem; text-decoration: none; font-family: 'Outfit', sans-serif;">anvarsadikh786@gmail.com</a>
                     </div>
-                    <div style="display: flex; gap: 12px; align-items: center;">
-                        <i class="fas fa-clock" style="color: var(--red); flex-shrink: 0; font-size: 0.9rem;"></i>
-                        <span style="color: rgba(255,255,255,0.58); font-size: 0.82rem; font-family: 'Outfit', sans-serif;">Mon – Sat &nbsp;|&nbsp; 9:00 AM – 7:00 PM</span>
+                    <div style="display: flex; gap: 12px; align-items: flex-start;">
+                        <i class="fas fa-clock" style="color: var(--red); flex-shrink: 0; font-size: 0.9rem; margin-top: 3px;"></i>
+                        <div>
+                            <p style="color: rgba(255,255,255,0.72); font-size: 0.85rem; margin: 0 0 4px; font-family: 'Outfit', sans-serif;">Mon – Sat: 9:00 AM – 8:30 PM</p>
+                            <p style="color: rgba(255,255,255,0.72); font-size: 0.85rem; margin: 0; font-family: 'Outfit', sans-serif;">Sun: 9:00 AM – 3:00 PM</p>
+                        </div>
                     </div>
                     <a href="https://maps.app.goo.gl/anzAXeuXoRe4LNdaA" target="_blank"
                        style="display: inline-flex; align-items: center; gap: 8px; background: var(--red); color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: 0.2s; width: fit-content; font-family: 'Outfit', sans-serif; margin-top: 4px;"

@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <img src="${item.img}" alt="">
                     <div class="ecom-item-details">
                         <div class="ecom-item-title">${item.title}</div>
-                        <div class="ecom-item-price">${item.price}</div>
+                        ${item.price ? `<div class="ecom-item-price">${item.price}</div>` : ''}
                     </div>
                     <button class="ecom-remove-btn" onclick="removeFromCart(${index})"><i class="fas fa-trash"></i></button>
                 </div>
@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <img src="${item.img}" alt="">
                     <div class="ecom-item-details">
                         <div class="ecom-item-title">${item.title}</div>
-                        <div class="ecom-item-price">${item.price}</div>
+                        ${item.price ? `<div class="ecom-item-price">${item.price}</div>` : ''}
                     </div>
                     <button class="btn btn-green" onclick="moveWishlistToCart(${index})" style="padding:5px 10px; font-size:0.8rem;">Add to Cart</button>
                     <button class="ecom-remove-btn" onclick="removeFromWishlist(${index})"><i class="fas fa-trash"></i></button>
@@ -389,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <img src="${item.img}" alt="${item.title}" style="width:50px; height:50px; object-fit:contain; border-radius:8px; border:1px solid #f1f5f9; padding:3px; background:#fff; flex-shrink:0;">
                     <div style="flex:1; min-width:0;">
                         <h4 style="font-size:0.85rem; font-weight:700; color:#1e293b; margin:0 0 2px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.title}">${item.title}</h4>
-                        <div style="font-size:0.95rem; font-weight:800; color:var(--red);">${item.price || 'Ask Price'}</div>
+                        <div style="font-size:0.95rem; font-weight:800; color:var(--red);">${item.price || ''}</div>
                     </div>
                     <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
                         <button class="btn-buy-single" onclick="quickBuyItem(${index})" style="background:var(--green); color:#fff; border:none; border-radius:6px; padding:6px 10px; font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:3px; transition:0.2s;"><i class="fab fa-whatsapp"></i> Buy</button>
@@ -422,7 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <img src="${item.img}" alt="${item.title}" style="width:50px; height:50px; object-fit:contain; border-radius:8px; border:1px solid #f1f5f9; padding:3px; background:#fff; flex-shrink:0;">
                     <div style="flex:1; min-width:0;">
                         <h4 style="font-size:0.85rem; font-weight:700; color:#1e293b; margin:0 0 2px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${item.title}">${item.title}</h4>
-                        <div style="font-size:0.95rem; font-weight:800; color:var(--red);">${item.price || 'Ask Price'}</div>
+                        <div style="font-size:0.95rem; font-weight:800; color:var(--red);">${item.price || ''}</div>
                     </div>
                     <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
                         <button onclick="moveWishlistToCart(${index})" style="background:var(--red-light); color:var(--red); border:none; border-radius:6px; padding:6px 10px; font-size:0.75rem; font-weight:700; cursor:pointer; transition:0.2s;">Add to Cart</button>
@@ -466,9 +466,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Removed from Cart!', 'info');
                 return;
             }
+            const priceEl = card.querySelector('.current');
             const item = {
                 title: title,
-                price: card.querySelector('.current').innerText,
+                price: priceEl ? priceEl.innerText.trim() : '',
                 img: card.querySelector('img').src
             };
             cart.push(item);
@@ -492,9 +493,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Removed from Wishlist!', 'info');
                 return;
             }
+            const priceEl2 = card.querySelector('.current');
             const item = {
                 title: title,
-                price: card.querySelector('.current').innerText,
+                price: priceEl2 ? priceEl2.innerText.trim() : '',
                 img: card.querySelector('img').src
             };
             wishlist.push(item);

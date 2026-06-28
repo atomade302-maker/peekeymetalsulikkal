@@ -36,7 +36,7 @@
     .pk-detail-box {
       position: relative;
       background: #ffffff;
-      width: min(95vw, 860px);
+      width: min(95vw, 1050px);
       max-height: 90vh;
       border-radius: 24px;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
@@ -75,7 +75,7 @@
     }
     .pk-detail-grid {
       display: grid;
-      grid-template-columns: 1.1fr 1fr;
+      grid-template-columns: 1.25fr 1fr;
       gap: 32px;
       padding: 32px;
       overflow-y: auto;
@@ -1001,11 +1001,8 @@
     if (p.price) {
       const priceVal = parseInt(p.price.toString().replace(/[^0-9]/g, ''));
       priceCurrent.textContent = '₹' + priceVal.toLocaleString('en-IN');
-      const mrp = Math.ceil(priceVal * 1.35 / 100) * 100;
-      priceOld.textContent = '₹' + mrp.toLocaleString('en-IN');
-      priceOld.style.display = 'inline';
-      priceDiscount.textContent = '(25% OFF)';
-      priceDiscount.style.display = 'inline';
+      priceOld.style.display = 'none';
+      priceDiscount.style.display = 'none';
     } else {
       priceCurrent.textContent = 'Price on Request';
       priceOld.style.display = 'none';
@@ -1528,11 +1525,8 @@
       if (newPrice) {
         const priceVal = parseInt(newPrice.toString().replace(/[^0-9]/g, ''));
         priceCurrent.textContent = '₹' + priceVal.toLocaleString('en-IN');
-        const mrp = Math.ceil(priceVal * 1.35 / 100) * 100;
-        priceOld.textContent = '₹' + mrp.toLocaleString('en-IN');
-        priceOld.style.display = 'inline';
-        priceDiscount.textContent = '(25% OFF)';
-        priceDiscount.style.display = 'inline';
+        priceOld.style.display = 'none';
+        priceDiscount.style.display = 'none';
       } else {
         priceCurrent.textContent = 'Price on Request';
         priceOld.style.display = 'none';
