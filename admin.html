@@ -11,7 +11,7 @@
 :root{--bg:#080b12;--card:#111622;--card2:#181f2e;--red:#c0392b;--border:#1e2738;--text:#e8eaf0;--muted:#6b7494;--green:#10b981;--orange:#f59e0b}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-/* â”€â”€ LOGIN â”€â”€ */
+/* ── LOGIN ── */
 #loginPage{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 60% 40%,#1a0a10 0%,var(--bg) 70%)}
 .login-wrap{width:100%;max-width:420px;padding:20px}
 .login-logo{text-align:center;margin-bottom:32px}
@@ -28,7 +28,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .lbtn:hover{background:#a93226}
 .lerr{color:#ef4444;font-size:.82rem;margin-top:10px;text-align:center;display:none}
 
-/* â”€â”€ DASHBOARD â”€â”€ */
+/* ── DASHBOARD ── */
 #dashboard{display:none}
 .topbar{background:#0d1117;border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .topbar-brand{font-size:1.2rem;font-weight:800;color:var(--red)}
@@ -149,15 +149,15 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
   <div class="login-wrap">
     <div class="login-logo">
       <h1>PEEKEY</h1>
-      <p>Admin Image Manager â€” Restricted Access</p>
+      <p>Admin Image Manager — Restricted Access</p>
     </div>
     <div class="login-card">
-      <h2>Welcome Back ðŸ‘‹</h2>
+      <h2>Welcome Back 👋</h2>
       <p class="sub">Sign in to manage product images</p>
       <div class="lfield"><label>Username</label><input id="lUser" type="text" placeholder="admin"></div>
-      <div class="lfield"><label>Password</label><input id="lPass" type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="lfield"><label>Password</label><input id="lPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
       <button class="lbtn" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> Login</button>
-      <p class="lerr" id="lerr">âŒ Invalid credentials. Try again.</p>
+      <p class="lerr" id="lerr">❌ Invalid credentials. Try again.</p>
     </div>
   </div>
 </div>
@@ -178,7 +178,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       <div class="stat"><div class="n" id="sTotal">0</div><div class="l">Total Products</div></div>
       <div class="stat"><div class="n" id="sCats">0</div><div class="l">Categories</div></div>
       <div class="stat"><div class="n" id="sWeek">0</div><div class="l">Added This Week</div></div>
-      <div class="stat"><div class="n" id="sCloud" style="color:var(--green)">â—</div><div class="l">Cloud Status</div></div>
+      <div class="stat"><div class="n" id="sCloud" style="color:var(--green)">●</div><div class="l">Cloud Status</div></div>
     </div>
 
     <!-- Upload -->
@@ -188,7 +188,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 
       <!-- imgbb Config -->
       <div class="cfg-toggle" onclick="toggleCfg()">
-        <i class="fas fa-gear" id="cfgIcon"></i> âš™ï¸ Image Storage API Key
+        <i class="fas fa-gear" id="cfgIcon"></i> ⚙️ Image Storage API Key
         <span id="cfgStatusBadge" style="color:var(--green);margin-left:6px"></span>
       </div>
       <div class="cfg-box" id="cfgBox">
@@ -217,19 +217,19 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
           <div class="auto-detect" id="autoDetect"><i class="fas fa-magic"></i> Auto-detected category</div>
         </div>
         <div class="ufg">
-          <label>MRP / Price (â‚¹)</label>
+          <label>MRP / Price (₹)</label>
           <input id="uPrice" placeholder="e.g. 1999">
         </div>
         <div class="ufg">
           <label>Category</label>
           <select id="uCat">
-            <option value="Home Appliances">ðŸ”Œ Home Appliances</option>
-            <option value="Kitchenware">ðŸ³ Kitchenware</option>
-            <option value="Crockery & Dining">ðŸ½ï¸ Crockery &amp; Dining</option>
-            <option value="Pooja & Devotional">ðŸª” Pooja &amp; Devotional</option>
-            <option value="Home Essentials">ðŸ  Home Essentials</option>
-            <option value="Electrical & Lighting">ðŸ’¡ Electrical &amp; Lighting</option>
-            <option value="Gas Stoves & Hobs">ðŸ”¥ Gas Stoves &amp; Hobs</option>
+            <option value="Home Appliances">🔌 Home Appliances</option>
+            <option value="Kitchenware">🍳 Kitchenware</option>
+            <option value="Crockery & Dining">🍽️ Crockery &amp; Dining</option>
+            <option value="Pooja & Devotional">🪔 Pooja &amp; Devotional</option>
+            <option value="Home Essentials">🏠 Home Essentials</option>
+            <option value="Electrical & Lighting">💡 Electrical &amp; Lighting</option>
+            <option value="Gas Stoves & Hobs">🔥 Gas Stoves &amp; Hobs</option>
           </select>
         </div>
       </div>
@@ -237,7 +237,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       <div class="ap-dual-dz">
         <!-- Product Image Dropzone -->
         <div class="ap-dz-wrap">
-          <span class="ap-dz-badge required">â˜… Product Image (Required)</span>
+          <span class="ap-dz-badge required">★ Product Image (Required)</span>
           <div class="dropzone" id="dz" onclick="document.getElementById('fInput').click()" style="padding: 24px;">
             <i class="fas fa-image" style="font-size: 2rem; margin-bottom: 8px;"></i>
             <p style="font-size: 0.82rem;"><span>Click to browse</span> or drag &amp; drop</p>
@@ -248,7 +248,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 
         <!-- Description Image Dropzone -->
         <div class="ap-dz-wrap">
-          <span class="ap-dz-badge optional">âœ¦ Description / Spec (Optional)</span>
+          <span class="ap-dz-badge optional">✦ Description / Spec (Optional)</span>
           <div class="dropzone" id="descDz" onclick="document.getElementById('descFInput').click()" style="padding: 24px;">
             <i class="fas fa-file-invoice" style="font-size: 2rem; color: var(--orange); margin-bottom: 8px;"></i>
             <p style="font-size: 0.82rem;"><span style="color: var(--orange);">Click to browse</span> or drag &amp; drop</p>
@@ -280,7 +280,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 <div id="toast"><i class="fas fa-check-circle"></i><span id="toastMsg"></span></div>
 
 <script>
-// â”€â”€ CONFIG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── CONFIG ─────────────────────────────────────────────────────────
 const CREDS = { user: 'admin', pass: 'peekey@2024' };
 const SK = 'peekey_products_v2';
 const CK = { key: 'pk_imgbb_key' };
@@ -304,7 +304,7 @@ function detectCategory(name) {
   return null;
 }
 
-// â”€â”€ AUTH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── AUTH ───────────────────────────────────────────────────────────
 function doLogin() {
   const u = document.getElementById('lUser').value.trim();
   const p = document.getElementById('lPass').value;
@@ -325,7 +325,7 @@ if (sessionStorage.getItem('pk_admin')) {
   window.addEventListener('DOMContentLoaded', initDash);
 }
 
-// â”€â”€ INIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── INIT ───────────────────────────────────────────────────────────
 function updateApiUi() {
   const isCustom = document.getElementById('optCustom').checked;
   document.getElementById('customKeyRow').style.display = isCustom ? 'grid' : 'none';
@@ -343,15 +343,15 @@ function initDash() {
   }
   updateApiUi();
 
-  document.getElementById('cfgStatusBadge').textContent = 'âœ“ Connected';
-  document.getElementById('cfgStatus').textContent = useDefault ? 'âœ“ Using Default Permanent API Key' : 'âœ“ Custom API key saved';
-  document.getElementById('sCloud').textContent = 'âœ“';
+  document.getElementById('cfgStatusBadge').textContent = '✓ Connected';
+  document.getElementById('cfgStatus').textContent = useDefault ? '✓ Using Default Permanent API Key' : '✓ Custom API key saved';
+  document.getElementById('sCloud').textContent = '✓';
 
   renderGrid('All');
   updateStats();
 }
 
-// â”€â”€ CONFIG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── CONFIG ─────────────────────────────────────────────────────────
 function toggleCfg() {
   const box = document.getElementById('cfgBox');
   box.classList.toggle('open');
@@ -361,9 +361,9 @@ function saveCfg() {
   const isDefault = document.getElementById('optDefault').checked;
   if (isDefault) {
     localStorage.setItem('pk_use_default_key', 'true');
-    document.getElementById('cfgStatusBadge').textContent = 'âœ“ Connected';
-    document.getElementById('cfgStatus').textContent = 'âœ“ Using Default Permanent API Key';
-    document.getElementById('sCloud').textContent = 'âœ“';
+    document.getElementById('cfgStatusBadge').textContent = '✓ Connected';
+    document.getElementById('cfgStatus').textContent = '✓ Using Default Permanent API Key';
+    document.getElementById('sCloud').textContent = '✓';
     document.getElementById('cfgBox').classList.remove('open');
     showToast('Using default permanent API key.', 'ok');
   } else {
@@ -371,15 +371,15 @@ function saveCfg() {
     if (!key) { showToast('Paste your custom imgbb API key!', 'err'); return; }
     localStorage.setItem('pk_use_default_key', 'false');
     localStorage.setItem(CK.key, key);
-    document.getElementById('cfgStatusBadge').textContent = 'âœ“ Connected';
-    document.getElementById('cfgStatus').textContent = 'âœ“ Custom API key saved';
-    document.getElementById('sCloud').textContent = 'âœ“';
+    document.getElementById('cfgStatusBadge').textContent = '✓ Connected';
+    document.getElementById('cfgStatus').textContent = '✓ Custom API key saved';
+    document.getElementById('sCloud').textContent = '✓';
     document.getElementById('cfgBox').classList.remove('open');
     showToast('Custom API key saved successfully.', 'ok');
   }
 }
 
-// â”€â”€ AUTO DETECT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── AUTO DETECT ────────────────────────────────────────────────────
 function autoDetectCat(val) {
   const cat = detectCategory(val);
   const sel = document.getElementById('uCat');
@@ -387,13 +387,13 @@ function autoDetectCat(val) {
   if (cat) {
     sel.value = cat;
     msg.style.display = 'block';
-    msg.textContent = 'âœ¨ Auto-sorted to: ' + cat;
+    msg.textContent = '✨ Auto-sorted to: ' + cat;
   } else {
     msg.style.display = 'none';
   }
 }
 
-// â”€â”€ FILE HANDLING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── FILE HANDLING ──────────────────────────────────────────────────
 let selFiles = [];
 let selDescFile = null;
 
@@ -456,7 +456,7 @@ function clearFiles() {
   document.getElementById('autoDetect').style.display = 'none';
 }
 
-// â”€â”€ UPLOAD via imgbb â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── UPLOAD via imgbb ───────────────────────────────────────────────
 async function doUpload() {
   const name = document.getElementById('uName').value.trim();
   const cat = document.getElementById('uCat').value;
@@ -465,7 +465,7 @@ async function doUpload() {
   if (!name) { showToast('Enter a product name!', 'err'); return; }
   if (!apiKey) {
     document.getElementById('cfgBox').classList.add('open');
-    showToast('âš™ï¸ Configure your imgbb API key first!', 'err');
+    showToast('⚙️ Configure your imgbb API key first!', 'err');
     return;
   }
   if (!selFiles.length) { showToast('Select images to upload!', 'err'); return; }
@@ -562,7 +562,7 @@ async function doUpload() {
   btn.disabled = false;
   btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Upload to Cloud';
   pbw.style.display = 'none'; pbf.style.width = '0';
-  showToast(`âœ… ${done} image(s) uploaded & live on website!`, 'ok');
+  showToast(`✅ ${done} image(s) uploaded & live on website!`, 'ok');
   renderGrid(currentFilter);
   updateStats();
 }
@@ -576,7 +576,7 @@ function toBase64(file) {
   });
 }
 
-// â”€â”€ GRID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── GRID ───────────────────────────────────────────────────────────
 let currentFilter = 'All';
 function renderGrid(filter) {
   currentFilter = filter;
@@ -608,19 +608,19 @@ function renderGrid(filter) {
           <input type="text" value="${p.name}" onchange="updateProduct(${ri}, 'name', this.value)" style="width:100%;padding:4px 8px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:0.8rem;outline:none;">
         </div>
         <div>
-          <label style="font-size:0.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:2px;text-transform:uppercase;">MRP / Price (â‚¹)</label>
+          <label style="font-size:0.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:2px;text-transform:uppercase;">MRP / Price (₹)</label>
           <input type="text" value="${p.price || ''}" placeholder="e.g. 1999" onchange="updateProduct(${ri}, 'price', this.value)" style="width:100%;padding:4px 8px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:0.8rem;outline:none;">
         </div>
         <div>
           <label style="font-size:0.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:2px;text-transform:uppercase;">Category</label>
           <select onchange="updateProduct(${ri}, 'category', this.value)" style="width:100%;padding:4px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:0.8rem;outline:none;cursor:pointer;">
-            <option value="Home Appliances" ${p.category==='Home Appliances'?'selected':''}>ðŸ”Œ Home Appliances</option>
-            <option value="Kitchenware" ${p.category==='Kitchenware'?'selected':''}>ðŸ³ Kitchenware</option>
-            <option value="Crockery & Dining" ${p.category==='Crockery & Dining'?'selected':''}>ðŸ½ï¸ Crockery & Dining</option>
-            <option value="Pooja & Devotional" ${p.category==='Pooja & Devotional'?'selected':''}>ðŸª” Pooja & Devotional</option>
-            <option value="Home Essentials" ${p.category==='Home Essentials'?'selected':''}>ðŸ  Home Essentials</option>
-            <option value="Electrical & Lighting" ${p.category==='Electrical & Lighting'?'selected':''}>ðŸ’¡ Electrical & Lighting</option>
-            <option value="Gas Stoves & Hobs" ${p.category==='Gas Stoves & Hobs'?'selected':''}>ðŸ”¥ Gas Stoves & Hobs</option>
+            <option value="Home Appliances" ${p.category==='Home Appliances'?'selected':''}>🔌 Home Appliances</option>
+            <option value="Kitchenware" ${p.category==='Kitchenware'?'selected':''}>🍳 Kitchenware</option>
+            <option value="Crockery & Dining" ${p.category==='Crockery & Dining'?'selected':''}>🍽️ Crockery & Dining</option>
+            <option value="Pooja & Devotional" ${p.category==='Pooja & Devotional'?'selected':''}>🪔 Pooja & Devotional</option>
+            <option value="Home Essentials" ${p.category==='Home Essentials'?'selected':''}>🏠 Home Essentials</option>
+            <option value="Electrical & Lighting" ${p.category==='Electrical & Lighting'?'selected':''}>💡 Electrical & Lighting</option>
+            <option value="Gas Stoves & Hobs" ${p.category==='Gas Stoves & Hobs'?'selected':''}>🔥 Gas Stoves & Hobs</option>
           </select>
         </div>
         <button class="pdel" onclick="delProduct(${ri})" style="width:100%;margin-top:4px;"><i class="fas fa-trash"></i> Remove</button>
@@ -657,9 +657,9 @@ function updateStats() {
   document.getElementById('sWeek').textContent = p.filter(x => x.at > wk).length;
 }
 
-// â”€â”€ STORAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── STORAGE ────────────────────────────────────────────────────────
 const DEFAULT_PRODUCTS = [
-  { id: "def-mixer", name: "Mixer Grinder", category: "Home Appliances", url: "Mixer Grinder.png", price: "", at: 1718360000000 },
+  { id: "def-mixer", name: "Mixer Grinder", category: "Home Appliances", url: "mixer grinder.png", price: "", at: 1718360000000 },
   { id: "def-wet", name: "Wet Grinder", category: "Home Appliances", url: "Wet Grinder.png", price: "", at: 1718360000000 },
   { id: "def-juicer", name: "Juicer", category: "Home Appliances", url: "Juicer.png", price: "", at: 1718360000000 },
   { id: "def-rice", name: "Rice Cooker", category: "Home Appliances", url: "Rice Cooker.png", price: "", at: 1718360000000 },
@@ -705,7 +705,7 @@ const DEFAULT_PRODUCTS = [
   { id: "def-kalash", name: "Copper Kalash", category: "Pooja & Devotional", url: "Copper Kalash.png", price: "", at: 1718360000000 },
   { id: "def-panchapathram", name: "Panchapathram Set", category: "Pooja & Devotional", url: "Panchapathram Set.png", price: "", at: 1718360000000 },
   { id: "def-wbottle", name: "Water Bottles", category: "Home Essentials", url: "water bottle.png", price: "", at: 1718360000000 },
-  { id: "def-sbottle", name: "Steel Bottles", category: "Home Essentials", url: "water bottle.png", price: "", at: 1718360000000 },
+  { id: "def-sbottle", name: "Steel Bottles", category: "Home Essentials", url: "steel water bottle.png", price: "", at: 1718360000000 },
   { id: "def-flask", name: "Vacuum Flasks", category: "Home Essentials", url: "vacuum flask.png", price: "", at: 1718360000000 },
   { id: "def-lunch", name: "Lunch Boxes", category: "Home Essentials", url: "lunch box.png", price: "", at: 1718360000000 },
   { id: "def-fstorage", name: "Food Storage", category: "Home Essentials", url: "Storage Containers.png", price: "", at: 1718360000000 },
@@ -739,6 +739,16 @@ if (!localStorage.getItem('pk_initialized')) {
                 p.descUrl = p.descUrl.split('/').pop();
                 updated = true;
               }
+              // Correct Mixer Grinder casing for case-sensitive hosting/mobile mode
+              if (p.url === 'Mixer Grinder.png') {
+                p.url = 'mixer grinder.png';
+                updated = true;
+              }
+              // Correct Steel Bottles image path
+              if (p.id === 'def-sbottle' && p.url === 'water bottle.png') {
+                p.url = 'steel water bottle.png';
+                updated = true;
+              }
             });
       if (updated) {
         localStorage.setItem(SK, JSON.stringify(parsed));
@@ -750,7 +760,7 @@ if (!localStorage.getItem('pk_initialized')) {
 function getProducts() { try { return JSON.parse(localStorage.getItem(SK) || '[]'); } catch { return []; } }
 function saveProducts(arr) { localStorage.setItem(SK, JSON.stringify(arr)); }
 
-// â”€â”€ TOAST â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── TOAST ──────────────────────────────────────────────────────────
 function showToast(msg, type = 'ok') {
   const t = document.getElementById('toast');
   t.querySelector('i').className = type === 'ok' ? 'fas fa-check-circle' : 'fas fa-circle-xmark';
