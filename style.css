@@ -734,7 +734,7 @@ ul {
 /* Category Grid */
 .category-grid-exact {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 20px;
 }
 
@@ -746,7 +746,7 @@ ul {
     display: flex;
     flex-direction: column;
     position: relative;
-    height: 285px;
+    height: 330px;
     transition: 0.4s;
     color: #111;
     border: 1px solid rgba(255,255,255,0.6);
@@ -791,7 +791,7 @@ ul {
 .cat-card-img {
     margin-top: auto;
     width: 100%;
-    height: 170px;
+    height: 210px;
     object-fit: contain;
     mix-blend-mode: multiply;
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -921,7 +921,7 @@ ul {
 }
 
 .product-img-box {
-    height: 260px;
+    height: 320px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -964,7 +964,7 @@ ul {
 .product-price-exact .current {
     font-weight: 800;
     font-size: 1.15rem;
-    color: var(--green);
+    color: #111;
 }
 
 .product-price-exact .old {
@@ -1351,7 +1351,7 @@ ul {
 
 .shelf-container {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 18px;
 }
 
@@ -1391,7 +1391,7 @@ ul {
 }
 
 .item-image-placeholder {
-    height: 220px;
+    height: 280px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2505,5 +2505,232 @@ section, [id], .inv-anchor {
         padding: 6px 14px !important;
         font-size: 0.75rem !important;
         border-width: 1px !important;
+    }
+}
+
+/* =========================================================================
+   ENHANCED RESPONSIVE — Mobile & Tablet Improvements
+   ========================================================================= */
+
+/* Testimonials: single column on small mobile */
+@media (max-width: 480px) {
+    .test-grid-exact {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+    .test-card-exact {
+        padding: 20px !important;
+    }
+    .test-avatar {
+        width: 42px !important;
+        height: 42px !important;
+        font-size: 0.85rem !important;
+    }
+}
+
+/* Hero on small screens */
+@media (max-width: 480px) {
+    .hero-left {
+        padding: 28px 16px 12px !important;
+    }
+    .hero-text-content h1 {
+        font-size: 1.9rem !important;
+        line-height: 1.15 !important;
+    }
+    .hero-desc {
+        font-size: 0.9rem !important;
+        margin-bottom: 18px !important;
+    }
+    .hero-buttons {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+    .hero-buttons a, .hero-buttons button {
+        width: 100% !important;
+        text-align: center !important;
+        justify-content: center !important;
+    }
+    .floating-features {
+        grid-template-columns: repeat(2, 1fr) !important;
+        display: grid !important;
+        gap: 10px !important;
+        padding: 12px 0 !important;
+    }
+    .feature-card {
+        min-width: unset !important;
+        padding: 12px !important;
+        font-size: 0.78rem !important;
+        border-radius: 10px !important;
+    }
+    .feature-card i {
+        font-size: 1.3rem !important;
+    }
+}
+
+/* Promo banner on mobile */
+@media (max-width: 480px) {
+    .promo-right {
+        padding: 24px 16px !important;
+    }
+    .promo-right h2 {
+        font-size: 3.5rem !important;
+    }
+    .promo-desc {
+        font-size: 0.9rem !important;
+        margin-bottom: 16px !important;
+    }
+}
+
+/* Section titles on mobile */
+@media (max-width: 480px) {
+    .section-title-center {
+        font-size: 1.45rem !important;
+        margin-bottom: 28px !important;
+    }
+    .section-title-left {
+        font-size: 1.4rem !important;
+    }
+    .section-padding {
+        padding: 45px 0 !important;
+    }
+}
+
+/* Why Choose Us — 2-col on tablet, 1-col on mobile */
+@media (max-width: 480px) {
+    .wcu-grid-exact {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+    }
+    .wcu-card-exact {
+        padding: 20px 16px !important;
+    }
+}
+@media (min-width: 481px) and (max-width: 768px) {
+    .wcu-grid-exact {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px !important;
+    }
+}
+
+/* Newsletter on mobile */
+@media (max-width: 480px) {
+    .newsletter-exact {
+        padding: 28px 16px !important;
+        border-radius: 20px 20px 0 0 !important;
+    }
+    .nl-left {
+        gap: 12px !important;
+    }
+    .nl-icon {
+        width: 48px !important;
+        height: 48px !important;
+        font-size: 1.4rem !important;
+    }
+    .nl-text h3 {
+        font-size: 1.15rem !important;
+    }
+    .nl-right {
+        flex-direction: column !important;
+        padding: 6px !important;
+        gap: 8px !important;
+        border-radius: 16px !important;
+    }
+    .nl-right input {
+        padding: 12px 14px !important;
+        border-radius: 12px !important;
+        background: rgba(255,255,255,0.1) !important;
+        width: 100% !important;
+    }
+    .nl-right .btn-orange {
+        width: 100% !important;
+        justify-content: center !important;
+        border-radius: 12px !important;
+    }
+}
+
+/* Footer on mobile */
+@media (max-width: 480px) {
+    .footer-grid-exact {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 20px !important;
+    }
+    .footer-col-exact.brand {
+        grid-column: 1 / -1 !important;
+    }
+    .footer-col-exact.contact {
+        grid-column: 1 / -1 !important;
+    }
+    .footer-bottom-exact {
+        flex-direction: column !important;
+        gap: 12px !important;
+        text-align: center !important;
+    }
+    .footer-exact {
+        padding: 40px 0 20px !important;
+    }
+}
+
+/* Inventory title on mobile */
+@media (max-width: 480px) {
+    .inventory-page-title {
+        padding: 40px 0 20px !important;
+    }
+    .inventory-page-title h1 {
+        font-size: 1.6rem !important;
+    }
+    .section-title-new h2 {
+        font-size: 1rem !important;
+        letter-spacing: 1px !important;
+    }
+}
+
+/* Right sidebar notch hidden on mobile to avoid collision */
+@media (max-width: 576px) {
+    .right-notch-btn {
+        top: auto !important;
+        bottom: 72px !important;
+        transform: none !important;
+        padding: 10px 8px !important;
+    }
+}
+
+/* Google review section on mobile */
+@media (max-width: 576px) {
+    .test-grid-exact {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Ensure images never overflow */
+img {
+    max-width: 100%;
+}
+
+/* Smooth tap targets for mobile */
+@media (max-width: 768px) {
+    button, a {
+        -webkit-tap-highlight-color: transparent;
+    }
+    .btn-red, .btn-orange, .btn-green {
+        padding: 11px 24px !important;
+        font-size: 0.9rem !important;
+    }
+}
+
+/* pk-detail-modal (product popup) mobile fix */
+@media (max-width: 600px) {
+    .pk-detail-box {
+        padding: 16px !important;
+        border-radius: 16px !important;
+    }
+    .pk-detail-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+    .pk-detail-gallery {
+        max-height: 260px !important;
+    }
+    .pk-detail-price-current {
+        font-size: 1.5rem !important;
     }
 }
